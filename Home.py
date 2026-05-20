@@ -631,6 +631,13 @@ div.stDownloadButton > button {
     backdrop-filter: blur(8px);
 }
 
+div.stDownloadButton > button,
+div.stDownloadButton > button * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+}
+
 div.stDownloadButton > button:hover {
     border-color: #2563eb;
     box-shadow: 0 10px 28px rgba(37, 99, 235, 0.18);
@@ -646,6 +653,13 @@ div.stLinkButton > a {
     color: #0f172a;
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.10);
     backdrop-filter: blur(8px);
+}
+
+div.stLinkButton > a,
+div.stLinkButton > a * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
 }
 
 div.stLinkButton > a:hover {
