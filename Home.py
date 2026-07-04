@@ -922,22 +922,22 @@ projects_html = dedent(f"""
 
     {project_card(
         "Business Analytics Project",
-        "Coming Soon",
+        "Completed",
         "Retail Sales Analytics Dashboard",
         "Self-built business analytics dashboard using public retail data to analyse revenue trends, customer behaviour, product performance, and commercial KPIs.",
         "Streamlit · pandas · Plotly · KPI design · dashboarding · business analytics",
         "Portfolio value: dashboard development, business KPI design, and data storytelling.",
-        "upcoming"
+        "completed"
     )}
 
     {project_card(
         "Data Science Project",
-        "Coming Soon",
+        "Completed",
         "Customer Churn Prediction",
         "Practical data science project using public data to predict churn risk, evaluate model performance, and design customer retention recommendations. This project will demonstrate the full applied data science workflow from EDA and feature engineering to model interpretation and business action planning.",
         "Classification · feature engineering · ROC-AUC · precision · recall · retention strategy",
         "Portfolio value: business-focused predictive modelling and model-to-action thinking.",
-        "upcoming",
+        "completed",
         "project-card-wide"
     )}
 </div>
