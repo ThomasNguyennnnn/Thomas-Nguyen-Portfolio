@@ -4,8 +4,9 @@ from pathlib import Path
 from textwrap import dedent
 from html import escape
 
+
 # ============================================================
-# PAGE CONFIGURATION
+# 1. PAGE CONFIGURATION
 # ============================================================
 
 st.set_page_config(
@@ -15,34 +16,46 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
 # ============================================================
-# PATHS AND LINKS
+# 2. PATHS AND CONTACT INFORMATION
 # ============================================================
 
 ROOT = Path(__file__).resolve().parent
-RESUME = ROOT / "assets" / "resume.pdf"
 
-GITHUB_URL = "https://github.com/ThomasNguyennnnn"
+RESUME_FILE = ROOT / "assets" / "resume.pdf"
+
+GITHUB_URL = (
+    "https://github.com/ThomasNguyennnnn"
+)
+
 LINKEDIN_URL = (
     "https://www.linkedin.com/in/thomas-tuan-nguyen/"
 )
+
 EMAIL = "thomas.nttn.au@gmail.com"
 
 ABOUT_PAGE = "pages/1_About_Me.py"
 
-PROJECT_PAGES = [
-    "pages/2_Cyber_Risk_Forecasting.py",
-    "pages/3_Sports_Broadcast_Analytics.py",
-    "pages/4_Food101_CNN_Transfer_Learning.py",
-    "pages/5_Retail_Intelligence.py",
-]
+CYBER_PAGE = "pages/2_Cyber_Risk_Forecasting.py"
+
+SPORTS_PAGE = "pages/3_Sports_Broadcast_Analytics.py"
+
+FOOD_PAGE = "pages/4_Food101_CNN_Transfer_Learning.py"
+
+RETAIL_PAGE = "pages/5_Retail_Intelligence.py"
 
 
 # ============================================================
-# HTML HELPERS
+# 3. HTML HELPERS
 # ============================================================
 
 def compact_html(source):
+    """
+    Render multiline HTML safely within one
+    Streamlit markdown block.
+    """
+
     return " ".join(
         line.strip()
         for line in dedent(source).splitlines()
@@ -51,6 +64,7 @@ def compact_html(source):
 
 
 def render_html(source):
+
     st.markdown(
         compact_html(source),
         unsafe_allow_html=True,
@@ -58,6 +72,7 @@ def render_html(source):
 
 
 def render_grid(css_class, cards):
+
     render_html(
         f'<div class="{css_class}">'
         + "".join(cards)
@@ -66,22 +81,39 @@ def render_grid(css_class, cards):
 
 
 def section_heading(title, subtitle):
+
     render_html(f"""
-        <div class="section-title">{title}</div>
-        <div class="section-subtitle">{subtitle}</div>
+        <div class="section-title">
+            {title}
+        </div>
+
+        <div class="section-subtitle">
+            {subtitle}
+        </div>
     """)
 
 
 # ============================================================
-# COMPONENTS
+# 4. CARD COMPONENTS
 # ============================================================
 
 def metric_card(value, label, note):
+
     return compact_html(f"""
         <div class="metric-card">
-            <div class="metric-value">{value}</div>
-            <div class="metric-label">{label}</div>
-            <div class="metric-note">{note}</div>
+
+            <div class="metric-value">
+                {value}
+            </div>
+
+            <div class="metric-label">
+                {label}
+            </div>
+
+            <div class="metric-note">
+                {note}
+            </div>
+
         </div>
     """)
 
@@ -95,12 +127,20 @@ def project_card(
     result,
     result_label,
 ):
+
     return compact_html(f"""
         <div class="project-card">
 
             <div class="project-heading">
-                <span class="project-number">{escape(number)}</span>
-                <span class="project-category">{escape(category)}</span>
+
+                <span class="project-number">
+                    {escape(number)}
+                </span>
+
+                <span class="project-category">
+                    {escape(category)}
+                </span>
+
             </div>
 
             <div class="project-title">
@@ -116,12 +156,15 @@ def project_card(
             </div>
 
             <div class="project-result">
+
                 <div class="result-label">
                     {escape(result_label)}
                 </div>
+
                 <div class="result-text">
                     {escape(result)}
                 </div>
+
             </div>
 
         </div>
@@ -138,69 +181,89 @@ def render_project(
     result_label,
     page,
 ):
+    """
+    Render one fixed-height project card
+    followed by its navigation link.
+    """
+
     render_html(
         project_card(
-            number,
-            category,
-            title,
-            description,
-            skills,
-            result,
-            result_label,
+            number=number,
+            category=category,
+            title=title,
+            description=description,
+            skills=skills,
+            result=result,
+            result_label=result_label,
         )
     )
 
-    if (ROOT / page).exists():
+    if (ROOT / page).is_file():
+
         st.page_link(
             page,
             label="Explore case study →",
             use_container_width=True,
         )
+
     else:
+
         st.caption(
-            f"Page not found: {page}"
+            f"Project page unavailable: {page}"
         )
 
 
 # ============================================================
-# CSS
+# 5. CSS — FUTURISTIC LIGHT THEME
 # ============================================================
 
 st.markdown(
     """
 <style>
 
-/* --------------------------------------------------------
-   GLOBAL
--------------------------------------------------------- */
+/* ========================================================
+   GLOBAL VARIABLES
+======================================================== */
 
 :root {
     --text-dark: #0f172a;
     --text-main: #334155;
     --text-muted: #64748b;
+
     --blue: #2563eb;
     --violet: #7c3aed;
-    --cyan: #0891b2;
+    --cyan: #06b6d4;
+
     --border: rgba(129,140,248,0.28);
 }
 
+
+/* ========================================================
+   PAGE BACKGROUND
+======================================================== */
+
 .stApp {
+
     background:
+
         radial-gradient(
             circle at 8% 8%,
             rgba(79,70,229,0.18),
             transparent 28%
         ),
+
         radial-gradient(
             circle at 90% 10%,
             rgba(6,182,212,0.22),
             transparent 26%
         ),
+
         radial-gradient(
             circle at 50% 92%,
             rgba(37,99,235,0.14),
             transparent 34%
         ),
+
         linear-gradient(
             135deg,
             #edf4ff 0%,
@@ -210,7 +273,7 @@ st.markdown(
 }
 
 .block-container {
-    padding-top: 5rem;
+    padding-top: 5.5rem !important;
     padding-bottom: 4rem;
     max-width: 1240px;
 }
@@ -219,22 +282,27 @@ footer {
     visibility: hidden;
 }
 
-/* --------------------------------------------------------
-   SIDEBAR
--------------------------------------------------------- */
+
+/* ========================================================
+   DARK SIDEBAR
+======================================================== */
 
 section[data-testid="stSidebar"] {
+
     background:
+
         radial-gradient(
             circle at top left,
             rgba(37,99,235,0.35),
             transparent 30%
         ),
+
         radial-gradient(
             circle at bottom right,
             rgba(124,58,237,0.25),
             transparent 34%
         ),
+
         linear-gradient(
             180deg,
             #020617 0%,
@@ -247,32 +315,39 @@ section[data-testid="stSidebar"] * {
     color: #f8fafc !important;
 }
 
-/* --------------------------------------------------------
-   HERO
--------------------------------------------------------- */
+
+/* ========================================================
+   HERO CARD
+======================================================== */
 
 .hero-card {
+
     padding: 3.2rem 3rem;
+
     border-radius: 38px;
 
     background:
+
         radial-gradient(
             circle at 100% 0%,
             rgba(6,182,212,0.19),
             transparent 35%
         ),
+
         radial-gradient(
             circle at 0% 100%,
             rgba(124,58,237,0.12),
             transparent 38%
         ),
+
         linear-gradient(
             135deg,
             rgba(255,255,255,0.97),
             rgba(239,246,255,0.90)
         );
 
-    border: 1px solid rgba(129,140,248,0.34);
+    border:
+        1px solid rgba(129,140,248,0.34);
 
     box-shadow:
         0 28px 75px rgba(30,41,59,0.12),
@@ -282,7 +357,9 @@ section[data-testid="stSidebar"] * {
 }
 
 .hero-eyebrow {
+
     display: inline-block;
+
     padding: 0.43rem 0.9rem;
 
     border-radius: 999px;
@@ -295,9 +372,11 @@ section[data-testid="stSidebar"] * {
             #ccfbf1
         );
 
-    border: 1px solid rgba(99,102,241,0.25);
+    border:
+        1px solid rgba(99,102,241,0.25);
 
     color: #1e293b;
+
     font-size: 0.82rem;
     font-weight: 900;
 
@@ -305,9 +384,12 @@ section[data-testid="stSidebar"] * {
 }
 
 .hero-name {
+
     color: #0f172a;
+
     font-size: 4.1rem;
     font-weight: 950;
+
     letter-spacing: -2px;
     line-height: 1.1;
 
@@ -315,7 +397,9 @@ section[data-testid="stSidebar"] * {
 }
 
 .hero-gradient {
+
     background:
+
         linear-gradient(
             90deg,
             #2563eb,
@@ -325,21 +409,28 @@ section[data-testid="stSidebar"] * {
 
     -webkit-background-clip: text;
     background-clip: text;
+
     -webkit-text-fill-color: transparent;
 }
 
 .hero-role {
+
     color: #1e293b;
+
     font-size: 1.25rem;
     font-weight: 900;
+
     line-height: 1.5;
 
     margin-bottom: 1.15rem;
 }
 
 .hero-description {
+
     max-width: 820px;
+
     color: #475569;
+
     font-size: 1.05rem;
     line-height: 1.82;
 }
@@ -357,29 +448,40 @@ section[data-testid="stSidebar"] * {
 }
 
 .hero-tag {
+
     display: inline-block;
+
     padding: 0.4rem 0.74rem;
 
-    margin: 0.2rem 0.2rem 0.1rem 0;
+    margin:
+        0.2rem 0.2rem 0.1rem 0;
 
     border-radius: 999px;
 
-    background: rgba(255,255,255,0.82);
-    border: 1px solid rgba(167,139,250,0.28);
+    background:
+        rgba(255,255,255,0.82);
+
+    border:
+        1px solid rgba(167,139,250,0.28);
 
     color: #334155;
+
     font-size: 0.81rem;
     font-weight: 850;
 }
 
-/* --------------------------------------------------------
+
+/* ========================================================
    SECTION HEADINGS
--------------------------------------------------------- */
+======================================================== */
 
 .section-title {
+
     color: #0f172a;
+
     font-size: 1.95rem;
     font-weight: 950;
+
     letter-spacing: -0.5px;
 
     margin-top: 2.6rem;
@@ -387,37 +489,47 @@ section[data-testid="stSidebar"] * {
 }
 
 .section-subtitle {
+
     color: #64748b;
+
     font-size: 1rem;
     line-height: 1.65;
 
     margin-bottom: 1.3rem;
 }
 
-/* --------------------------------------------------------
-   METRICS
--------------------------------------------------------- */
+
+/* ========================================================
+   METRIC GRID
+======================================================== */
 
 .metric-grid {
+
     display: grid;
+
     grid-template-columns:
         repeat(4,minmax(0,1fr));
 
     gap: 1.15rem;
+
     align-items: stretch;
 }
 
 .metric-card {
+
     position: relative;
+
     overflow: hidden;
 
-    padding: 1.35rem 1.35rem;
+    padding: 1.35rem;
+
     min-height: 156px;
     height: 100%;
 
     border-radius: 25px;
 
     background:
+
         linear-gradient(
             135deg,
             rgba(255,255,255,0.97),
@@ -431,9 +543,11 @@ section[data-testid="stSidebar"] * {
 }
 
 .metric-card::before {
+
     content: "";
 
     position: absolute;
+
     top: 0;
     left: 0;
 
@@ -441,6 +555,7 @@ section[data-testid="stSidebar"] * {
     height: 5px;
 
     background:
+
         linear-gradient(
             90deg,
             #2563eb,
@@ -450,16 +565,21 @@ section[data-testid="stSidebar"] * {
 }
 
 .metric-value {
+
     color: #0f172a;
+
     font-size: 2rem;
     font-weight: 950;
+
     letter-spacing: -0.5px;
 
     margin-bottom: 0.3rem;
 }
 
 .metric-label {
+
     color: #4f46e5;
+
     font-size: 0.88rem;
     font-weight: 900;
 
@@ -467,30 +587,41 @@ section[data-testid="stSidebar"] * {
 }
 
 .metric-note {
+
     color: #64748b;
+
     font-size: 0.81rem;
     line-height: 1.55;
 }
 
-/* --------------------------------------------------------
-   PROJECT CARDS
--------------------------------------------------------- */
+
+/* ========================================================
+   PROJECT CARDS — FIXED ALIGNMENT
+======================================================== */
 
 .project-card {
+
     position: relative;
+
     overflow: hidden;
 
+    box-sizing: border-box;
+
     padding: 1.65rem 1.7rem;
-    min-height: 320px;
+
+    height: 390px;
+    min-height: 390px;
 
     border-radius: 30px;
 
     background:
+
         radial-gradient(
             circle at 100% 0%,
             rgba(124,58,237,0.08),
             transparent 35%
         ),
+
         linear-gradient(
             135deg,
             rgba(255,255,255,0.97),
@@ -511,9 +642,11 @@ section[data-testid="stSidebar"] * {
 }
 
 .project-card::before {
+
     content: "";
 
     position: absolute;
+
     top: 0;
     left: 0;
 
@@ -521,6 +654,7 @@ section[data-testid="stSidebar"] * {
     height: 6px;
 
     background:
+
         linear-gradient(
             90deg,
             #2563eb,
@@ -530,6 +664,7 @@ section[data-testid="stSidebar"] * {
 }
 
 .project-card:hover {
+
     transform: translateY(-3px);
 
     box-shadow:
@@ -537,21 +672,27 @@ section[data-testid="stSidebar"] * {
 }
 
 .project-heading {
+
     display: flex;
     flex-wrap: wrap;
+
     align-items: center;
+
     gap: 0.65rem;
 
     margin-bottom: 0.95rem;
 }
 
 .project-number {
+
     display: inline-block;
 
     padding: 0.36rem 0.7rem;
+
     border-radius: 999px;
 
     background:
+
         linear-gradient(
             90deg,
             #2563eb,
@@ -559,27 +700,33 @@ section[data-testid="stSidebar"] * {
         );
 
     color: #ffffff;
+
     font-size: 0.77rem;
     font-weight: 950;
 }
 
 .project-category {
+
     color: #4f46e5;
+
     font-size: 0.81rem;
     font-weight: 900;
 }
 
 .project-title {
+
     color: #0f172a;
 
     font-size: 1.28rem;
     font-weight: 950;
+
     line-height: 1.4;
 
     margin-bottom: 0.7rem;
 }
 
 .project-description {
+
     color: #475569;
 
     font-size: 0.94rem;
@@ -589,73 +736,247 @@ section[data-testid="stSidebar"] * {
 }
 
 .project-skills {
+
     color: #3730a3;
 
     font-size: 0.84rem;
     font-weight: 850;
+
     line-height: 1.6;
 
     margin-bottom: 1rem;
 }
 
 .project-result {
+
     margin-top: auto;
 
+    flex-shrink: 0;
+
     padding: 0.9rem 1rem;
+
     border-radius: 18px;
 
     background:
+
         linear-gradient(
             90deg,
             rgba(219,234,254,0.85),
             rgba(237,233,254,0.82)
         );
 
-    border: 1px solid rgba(167,139,250,0.25);
+    border:
+        1px solid rgba(167,139,250,0.25);
 }
 
 .result-label {
+
     color: #4f46e5;
 
     font-size: 0.75rem;
     font-weight: 950;
+
     letter-spacing: 0.4px;
 
     text-transform: uppercase;
+
     margin-bottom: 0.38rem;
 }
 
 .result-text {
+
     color: #334155;
 
     font-size: 0.9rem;
     font-weight: 750;
+
     line-height: 1.6;
 }
 
-/* --------------------------------------------------------
-   PORTFOLIO NAVIGATION
--------------------------------------------------------- */
+
+/* ========================================================
+   PAGE LINKS — MATCH BUTTON STYLE
+======================================================== */
 
 div[data-testid="stPageLink"] {
-    margin-top: 0.2rem;
-    margin-bottom: 1.6rem;
+
+    box-sizing: border-box;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 div[data-testid="stPageLink"] a {
-    font-weight: 850 !important;
-    color: #2563eb !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+
+    padding: 0 16px !important;
+
+    margin: 0 !important;
+
+    border-radius: 999px !important;
+
+    background:
+        rgba(255,255,255,0.90) !important;
+
+    border:
+        1px solid #b6c9ff !important;
+
+    color: #0f172a !important;
+
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+
+    text-align: center !important;
+    text-decoration: none !important;
+
+    box-shadow:
+        0 8px 20px rgba(59,130,246,0.10) !important;
 }
 
-/* --------------------------------------------------------
-   ABOUT TEASER
--------------------------------------------------------- */
+div[data-testid="stPageLink"] a * {
+
+    color: #0f172a !important;
+
+    -webkit-text-fill-color:
+        #0f172a !important;
+}
+
+div[data-testid="stPageLink"] p {
+    margin: 0 !important;
+}
+
+div[data-testid="stPageLink"] a:hover {
+
+    border-color: #2563eb !important;
+
+    box-shadow:
+        0 12px 26px rgba(37,99,235,0.17) !important;
+}
+
+
+/* ========================================================
+   STANDARD STREAMLIT BUTTONS
+======================================================== */
+
+div.stDownloadButton > button,
+div.stLinkButton > a {
+
+    box-sizing: border-box !important;
+
+    border-radius: 999px !important;
+
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+
+    font-weight: 600 !important;
+
+    background:
+        rgba(255,255,255,0.90) !important;
+
+    border:
+        1px solid #b6c9ff !important;
+
+    color: #0f172a !important;
+
+    box-shadow:
+        0 8px 20px rgba(59,130,246,0.10) !important;
+}
+
+div.stDownloadButton > button *,
+div.stLinkButton > a * {
+
+    color: #0f172a !important;
+
+    -webkit-text-fill-color:
+        #0f172a !important;
+}
+
+div.stDownloadButton > button:hover,
+div.stLinkButton > a:hover {
+
+    border-color: #2563eb !important;
+
+    box-shadow:
+        0 12px 26px rgba(37,99,235,0.17) !important;
+}
+
+
+/* ========================================================
+   HERO ACTIONS — SAME SIZE AND POSITION
+======================================================== */
+
+.st-key-hero_actions
+[data-testid="stHorizontalBlock"] {
+
+    align-items: center !important;
+}
+
+.st-key-hero_actions
+[data-testid="stPageLink"] {
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.st-key-hero_actions
+[data-testid="stPageLink"] a,
+
+.st-key-hero_actions
+div.stDownloadButton > button,
+
+.st-key-hero_actions
+div.stLinkButton > a {
+
+    box-sizing: border-box !important;
+
+    width: 100% !important;
+
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+
+    padding: 0 16px !important;
+
+    font-size: 0.92rem !important;
+    line-height: 1 !important;
+    text-align: center !important;
+}
+
+
+/* ========================================================
+   ABOUT ME TEASER
+======================================================== */
 
 .about-teaser {
+
     padding: 1.7rem 1.8rem;
+
     border-radius: 29px;
 
     background:
+
         linear-gradient(
             135deg,
             rgba(255,255,255,0.96),
@@ -669,7 +990,9 @@ div[data-testid="stPageLink"] a {
 }
 
 .about-teaser-title {
+
     color: #0f172a;
+
     font-size: 1.2rem;
     font-weight: 950;
 
@@ -677,71 +1000,67 @@ div[data-testid="stPageLink"] a {
 }
 
 .about-teaser-text {
+
     color: #475569;
+
     font-size: 0.96rem;
     line-height: 1.75;
 }
 
-/* --------------------------------------------------------
-   BUTTONS
--------------------------------------------------------- */
 
-div.stDownloadButton > button,
-div.stLinkButton > a {
-    border-radius: 999px !important;
+/* ========================================================
+   TEXT CONTRAST
+======================================================== */
 
-    font-weight: 850 !important;
+.block-container
+[data-testid="stMarkdownContainer"] > p {
 
-    border:
-        1px solid rgba(37,99,235,0.35) !important;
-
-    background:
-        rgba(255,255,255,0.88) !important;
-
-    color: #0f172a !important;
-
-    box-shadow:
-        0 8px 20px rgba(59,130,246,0.10);
-}
-
-div.stDownloadButton > button *,
-div.stLinkButton > a * {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-}
-
-/* --------------------------------------------------------
-   NATIVE TEXT CONTRAST
--------------------------------------------------------- */
-
-.block-container [data-testid="stMarkdownContainer"] > p {
     color: #334155;
 }
 
-.block-container [data-testid="stCaptionContainer"] p {
+.block-container
+[data-testid="stCaptionContainer"] p {
+
     color: #475569 !important;
 }
 
-/* --------------------------------------------------------
-   RESPONSIVE
--------------------------------------------------------- */
 
-@media (max-width: 1050px) {
+/* ========================================================
+   RESPONSIVE — MEDIUM SCREENS
+======================================================== */
 
-    .metric-grid {
-        grid-template-columns:
-            repeat(2,minmax(0,1fr));
-    }
+@media (
+    min-width: 761px
+) and (
+    max-width: 1100px
+) {
 
     .hero-name {
         font-size: 3.3rem;
     }
+
+    .metric-grid {
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .project-card {
+
+        height: 470px;
+        min-height: 470px;
+    }
 }
+
+
+/* ========================================================
+   RESPONSIVE — MOBILE
+======================================================== */
 
 @media (max-width: 760px) {
 
     .block-container {
-        padding-top: 4.5rem;
+        padding-top: 4.5rem !important;
     }
 
     .hero-card {
@@ -756,17 +1075,26 @@ div.stLinkButton > a * {
         font-size: 1.06rem;
     }
 
+    .section-title {
+        font-size: 1.65rem;
+    }
+
     .metric-grid {
         grid-template-columns: 1fr;
     }
 
-    .metric-card,
-    .project-card {
+    .metric-card {
         min-height: auto;
     }
 
-    .section-title {
-        font-size: 1.65rem;
+    .project-card {
+
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .project-result {
+        margin-top: 1rem;
     }
 }
 
@@ -777,7 +1105,7 @@ div.stLinkButton > a * {
 
 
 # ============================================================
-# HERO — SHORT INTRODUCTION
+# 6. HERO
 # ============================================================
 
 render_html("""
@@ -788,10 +1116,13 @@ render_html("""
         </div>
 
         <div class="hero-name">
+
             Turning data into
+
             <span class="hero-gradient">
                 evidence-driven decisions.
             </span>
+
         </div>
 
         <div class="hero-role">
@@ -814,6 +1145,7 @@ render_html("""
                 <b>cyber-risk research, sports analytics,
                 computer vision, and interactive
                 business intelligence</b>.
+
                 Each case study highlights the methods,
                 evidence, and limitations behind the work.
             </p>
@@ -821,222 +1153,335 @@ render_html("""
         </div>
 
         <div class="hero-tags">
-            <span class="hero-tag">Machine Learning</span>
-            <span class="hero-tag">Data Analytics</span>
-            <span class="hero-tag">Business Intelligence</span>
-            <span class="hero-tag">Applied Research</span>
+
+            <span class="hero-tag">
+                Machine Learning
+            </span>
+
+            <span class="hero-tag">
+                Data Analytics
+            </span>
+
+            <span class="hero-tag">
+                Business Intelligence
+            </span>
+
+            <span class="hero-tag">
+                Applied Research
+            </span>
+
         </div>
 
     </div>
 """)
 
+
+# ============================================================
+# 7. HERO ACTION BUTTONS
+# ============================================================
+
 st.write("")
 
-cta1, cta2, cta3 = st.columns(
-    [1, 1, 1],
-    gap="medium",
-)
+with st.container(key="hero_actions"):
 
-with cta1:
-    if (ROOT / ABOUT_PAGE).exists():
-        st.page_link(
-            ABOUT_PAGE,
-            label="👤 More About Me",
-            use_container_width=True,
-        )
+    cta1, cta2, cta3 = st.columns(
+        [1, 1, 1],
+        gap="large",
+        vertical_alignment="center",
+    )
 
-with cta2:
-    if RESUME.exists():
-        with open(RESUME, "rb") as file:
-            st.download_button(
-                "📄 Download Resume",
-                data=file,
-                file_name="Thomas_Nguyen_Resume.pdf",
-                mime="application/pdf",
+    with cta1:
+
+        if (ROOT / ABOUT_PAGE).is_file():
+
+            st.page_link(
+                ABOUT_PAGE,
+                label="👤 More About Me",
                 use_container_width=True,
             )
 
-with cta3:
-    st.link_button(
-        "💻 View GitHub",
-        GITHUB_URL,
-        use_container_width=True,
-    )
+    with cta2:
+
+        if RESUME_FILE.is_file():
+
+            with open(RESUME_FILE, "rb") as file:
+
+                st.download_button(
+                    label="📄 Download Resume",
+                    data=file,
+                    file_name="Thomas_Nguyen_Resume.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
+
+        else:
+
+            st.button(
+                "📄 Resume Unavailable",
+                disabled=True,
+                use_container_width=True,
+            )
+
+    with cta3:
+
+        st.link_button(
+            label="💻 View GitHub",
+            url=GITHUB_URL,
+            use_container_width=True,
+        )
 
 
 # ============================================================
-# PORTFOLIO IN NUMBERS
+# 8. PORTFOLIO AT A GLANCE
 # ============================================================
 
 section_heading(
     "Portfolio at a Glance",
-    "A few measurable highlights from the featured work."
+    "A few measurable highlights from the featured work.",
 )
 
-render_grid("metric-grid", [
+metrics = [
 
     metric_card(
         "4",
         "Featured Projects",
-        "Research, industry, deep learning, and BI."
+        "Research, industry, deep learning, and business intelligence.",
     ),
 
     metric_card(
         "2",
         "Accepted Research Papers",
-        "AusDM 2026 conference and MDPI Risks journal."
+        "AusDM 2026 conference and MDPI Risks journal.",
     ),
 
     metric_card(
         "85.07%",
         "Food101 Test Accuracy",
-        "Best fine-tuned ResNet50 configuration."
+        "Best fine-tuned ResNet50 configuration.",
     ),
 
     metric_card(
         "160K+",
         "Broadcast Frame Outputs",
-        "Scope of the Supercars analytics workflow."
+        "Scope of the Supercars analytics workflow.",
     ),
-])
+
+]
+
+render_grid(
+    "metric-grid",
+    metrics,
+)
 
 
 # ============================================================
-# FEATURED PROJECTS
+# 9. FEATURED PROJECTS
 # ============================================================
 
 section_heading(
     "Featured Projects",
-    "Four case studies, each demonstrating a different "
-    "part of the data science and analytics workflow."
+    "Four case studies demonstrating different aspects "
+    "of data science, analytics, and applied research.",
 )
 
-# ------------------------------------------------------------
-# ROW 1
-# ------------------------------------------------------------
+
+# ============================================================
+# PROJECT ROW 1
+# ============================================================
 
 left, right = st.columns(
-    2,
+    [1, 1],
     gap="large",
+    vertical_alignment="top",
 )
+
+
+# ------------------------------------------------------------
+# PROJECT 01 — CYBER RISK
+# ------------------------------------------------------------
 
 with left:
 
     render_project(
+
         number="01",
-        category="Advanced Research · Machine Learning",
-        title="Cyber Risk Modelling & Forecasting",
+
+        category=(
+            "Advanced Research · Machine Learning"
+        ),
+
+        title=(
+            "Cyber Risk Modelling & Forecasting"
+        ),
+
         description=(
             "Two-phase research investigating cyber-event "
             "dependence, entity-risk prediction, numerical "
             "frequency forecasting, and aggregate-loss risk."
         ),
+
         skills=(
             "Python · Hawkes Processes · Transformers · "
             "GRU · Statistical Modelling"
         ),
+
         result=(
-            "89.13% top-risk entity accuracy in Phase 1; "
-            "17.6% MAE improvement in the independent "
-            "synthetic GRU evaluation in Phase 2."
+            "89.13% top-risk entity accuracy in Phase 1. "
+            "Phase 2 compared system-wide frequency models "
+            "and extended the research to loss severity "
+            "and aggregate risk."
         ),
-        result_label="Research evidence",
-        page=PROJECT_PAGES[0],
+
+        result_label="Research Evidence",
+
+        page=CYBER_PAGE,
     )
+
+
+# ------------------------------------------------------------
+# PROJECT 02 — SPORTS BROADCAST
+# ------------------------------------------------------------
 
 with right:
 
     render_project(
+
         number="02",
-        category="Industry Experience · Commercial Analytics",
-        title="Sports Broadcast Analytics",
+
+        category=(
+            "Industry Experience · Commercial Analytics"
+        ),
+
+        title=(
+            "Sports Broadcast Analytics"
+        ),
+
         description=(
             "Sponsorship and broadcast-exposure analysis "
             "during an industry placement at Futures Sport "
             "& Entertainment, including data validation "
             "and media-monitoring support."
         ),
+
         skills=(
             "Excel · Power BI · TVEyes · "
             "Data Quality · Commercial Reporting"
         ),
+
         result=(
             "Approximately 200 placement hours; "
             "worked within a Supercars analytics workflow "
             "involving 160K+ broadcast frame outputs."
         ),
-        result_label="Industry scope",
-        page=PROJECT_PAGES[1],
+
+        result_label="Industry Scope",
+
+        page=SPORTS_PAGE,
     )
 
 
-# ------------------------------------------------------------
-# ROW 2
-# ------------------------------------------------------------
+# ============================================================
+# PROJECT ROW 2
+# ============================================================
 
 left, right = st.columns(
-    2,
+    [1, 1],
     gap="large",
+    vertical_alignment="top",
 )
+
+
+# ------------------------------------------------------------
+# PROJECT 03 — FOOD101
+# ------------------------------------------------------------
 
 with left:
 
     render_project(
+
         number="03",
-        category="Deep Learning · Computer Vision",
-        title="Food101 CNN Transfer Learning",
+
+        category=(
+            "Deep Learning · Computer Vision"
+        ),
+
+        title=(
+            "Food101 CNN Transfer Learning"
+        ),
+
         description=(
             "Compared frozen ResNet50 feature extraction "
             "with selective layer fine-tuning to improve "
             "multi-class food-image classification."
         ),
+
         skills=(
             "Python · PyTorch · ResNet50 · "
             "Transfer Learning · Model Evaluation"
         ),
+
         result=(
             "Test accuracy improved from 61.86% "
             "to 85.07% — a gain of 23.21 "
             "percentage points."
         ),
-        result_label="Measured improvement",
-        page=PROJECT_PAGES[2],
+
+        result_label="Measured Improvement",
+
+        page=FOOD_PAGE,
     )
+
+
+# ------------------------------------------------------------
+# PROJECT 04 — RETAIL INTELLIGENCE
+# ------------------------------------------------------------
 
 with right:
 
     render_project(
+
         number="04",
-        category="Business Intelligence · Applied ML",
-        title="Retail Intelligence",
+
+        category=(
+            "Business Intelligence · Applied ML"
+        ),
+
+        title=(
+            "Retail Intelligence"
+        ),
+
         description=(
             "An interactive retail analytics dashboard "
             "combining sales KPIs, product performance, "
             "RFM customer segmentation, and historical "
             "purchase-inactivity prediction."
         ),
+
         skills=(
             "Python · pandas · Plotly · Streamlit · "
             "scikit-learn · Customer Analytics"
         ),
+
         result=(
             "Real UCI transaction data, calculated KPIs, "
             "and three-model evaluation for a defined "
             "60-day purchasing-inactivity target."
         ),
-        result_label="Interactive analytics",
-        page=PROJECT_PAGES[3],
+
+        result_label="Interactive Analytics",
+
+        page=RETAIL_PAGE,
     )
 
 
 # ============================================================
-# ABOUT ME TEASER — NOT A SECOND BIOGRAPHY
+# 10. ABOUT ME TEASER
 # ============================================================
 
 section_heading(
     "Behind the Projects",
-    "A brief introduction here; the full background "
-    "is available on the About Me page."
+    "A brief introduction here; my full professional "
+    "background is available on the About Me page.",
 )
 
 render_html("""
@@ -1049,8 +1494,8 @@ render_html("""
         <div class="about-teaser-text">
 
             My approach combines careful data preparation,
-            measurable model evaluation, and clear communication
-            of results.
+            measurable model evaluation, and clear
+            communication of results.
 
             For more detail on my education, industry
             experience, research publications, academic
@@ -1064,43 +1509,54 @@ render_html("""
 
 st.write("")
 
-if (ROOT / ABOUT_PAGE).exists():
-    st.page_link(
-        ABOUT_PAGE,
-        label="Read my full professional background →",
+if (ROOT / ABOUT_PAGE).is_file():
+
+    about_col, _ = st.columns(
+        [1, 1],
     )
+
+    with about_col:
+
+        st.page_link(
+            ABOUT_PAGE,
+            label="Read my full professional background →",
+            use_container_width=True,
+        )
 
 
 # ============================================================
-# SIMPLE CONTACT SECTION
+# 11. CONTACT
 # ============================================================
 
 section_heading(
     "Connect",
     "Interested in data science, analytics, research, "
-    "or graduate opportunities? Let's connect."
+    "or graduate opportunities? Let's connect.",
 )
 
-col1, col2, col3 = st.columns(
-    3,
-    gap="medium",
+contact1, contact2, contact3 = st.columns(
+    [1, 1, 1],
+    gap="large",
 )
 
-with col1:
+with contact1:
+
     st.link_button(
         "✉️ Email",
         f"mailto:{EMAIL}",
         use_container_width=True,
     )
 
-with col2:
+with contact2:
+
     st.link_button(
         "🔗 LinkedIn",
         LINKEDIN_URL,
         use_container_width=True,
     )
 
-with col3:
+with contact3:
+
     st.link_button(
         "💻 GitHub",
         GITHUB_URL,
