@@ -4,3 +4,7 @@ numpy
 plotly
 matplotlib
 scikit-learn
+requests
+openpyxl
+matplotlib
+Pillow
