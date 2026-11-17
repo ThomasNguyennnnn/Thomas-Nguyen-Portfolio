@@ -4,6 +4,7 @@ A professional, interactive data science portfolio built with **Python and Strea
 
 The portfolio features **four projects**, with an emphasis on practical problem-solving, evidence-based evaluation, data visualisation, and communicating analytical findings clearly.
 
+**Live portfolio:** [Thomas Nguyen — Data Science Portfolio](https://thomas-nguyen-portfolio-m8x9p996ygqgagwxpfzzpg.streamlit.app/)  
 **GitHub:** [ThomasNguyennnnn](https://github.com/ThomasNguyennnnn)  
 **LinkedIn:** [Thomas Nguyen](https://www.linkedin.com/in/thomas-tuan-nguyen/)  
 **Email:** thomas.nttn.au@gmail.com
@@ -33,23 +34,29 @@ This portfolio is designed to provide an accessible overview of my work, with de
 
 ### 1. Cyber Risk Modelling & Forecasting
 
-A two-phase research project exploring temporal dependence, cyber-event prediction, and cyber-risk quantification.
+A two-phase research programme examining clustered cyber events, inter-entity dependence, forecasting, and conditional financial-risk quantification. Both research outputs are **accepted**; neither is described here as published.
 
-**Phase 1 — Conference Research (AusDM 2026, Accepted)**
+**Phase 1 — AusDM 2026 Conference Paper (Accepted)**  
+*A Hawkes–Transformer Model for Cyber Risk Prediction: Comparative Evaluation on a Synthetic Hawkes Benchmark*
 
-- Developed and evaluated models on a synthetic multivariate marked Hawkes benchmark.
-- Compared Transformer Hawkes Process, Neural Hawkes approaches, recurrent models, and statistical baselines.
-- Achieved **89.13% accuracy** for the primary top-risk entity prediction task using the Transformer Hawkes Process.
+- Constructed a controlled **six-entity, 10,000-event multivariate marked Hawkes benchmark** with self-excitation, directional propagation, and time-varying background activity.
+- Compared the **Transformer Hawkes Process (THP)** with a supervised GRU, a likelihood-based Neural Hawkes-style baseline, Poisson counts, and MCP-Titan retrieval.
+- On the conference study's top-risk entity classification task, **THP achieved 90.23% accuracy, 0.8951 macro-F1, and 99.40% top-3 accuracy**, leading the reported primary-task metrics.
+- These findings describe the **controlled synthetic benchmark**; they do not establish real-world predictive performance.
 
-**Phase 2 — Journal Research (MDPI *Risks*, Accepted)**
+**Phase 2 — MDPI *Risks* Journal Paper (Accepted)**  
+*From Cyber-Risk Prediction to Loss Quantification: A Task-Aware Frequency–Severity Framework with Hawkes Benchmarking and External Evaluation*
 
-- Reconstructed a system-wide event-frequency target from synthetic Hawkes event data.
-- Compared frequency models using chronological evaluation.
-- Combined the frequency component with independently calibrated cyber-loss severity assumptions.
-- Investigated expected aggregate loss, Value at Risk (VaR), Tail Value at Risk (TVaR), and severity-tail sensitivity.
-- Considered external evaluation using URLhaus data and discussed generalisability limitations.
+- Re-evaluated the related entity-classification task under a **chronological, boundary-purged protocol**. The highest fitted-model accuracy was **45.40%**, below the **46.87% majority-class reference**. The conference and journal accuracy figures **are not directly comparable** because the evaluation protocols differ.
+- Defined a separate target: **total system-wide cyber-event count in the next three simulator-time units**, and compared **ten forecasting model families**.
+- **GRU–Negative Binomial (GRU–NB)** was selected using validation performance, while **Rolling Mean achieved the lowest primary held-out test MAE of 6.9875**. Additional trajectory checks show that no single method dominates in every setting.
+- Combined synthetic event-frequency forecasts with **independently calibrated monetary severity** from published cyber-loss evidence, using explicit **event-to-loss probability scenarios**, rather than equating technical events with insurance claims.
+- Examined conditional expected aggregate loss, **Value at Risk (VaR)**, **Tail Value at Risk (TVaR)**, exceedance probabilities, and heavy-tail sensitivity. Some extreme-tail Monte Carlo scenarios failed the reported numerical-stability criteria and are not presented as reliable estimates.
+- Evaluated **URLhaus** as a separate observed cyber-threat dataset. The evaluation **did not establish reproducible prospective forecasting skill**; URLhaus records are not monetary insurance claims.
 
-**Technologies:** Python, Hawkes Processes, Transformers, GRU, LSTM, statistical modelling, probabilistic risk analysis.
+**Interpretation:** All financial amounts are **conditional scenarios per dimensionless simulated forecast window**, not annualised insurance losses, premiums, or realised claims.
+
+**Technologies:** Python, Hawkes processes, Transformer Hawkes Process, GRU/LSTM, statistical count models, chronological validation, probabilistic frequency–severity and tail-risk analysis.
 
 **Research data:** [IEEE DataPort — DOI 10.21227/8drm-jz27](https://dx.doi.org/10.21227/8drm-jz27)
 
@@ -117,7 +124,7 @@ Sales metrics are calculated from the loaded transaction data. Machine learning 
 
 | Area | Tools and methods |
 |---|---|
-| **Programming & Data Analysis** | Python, SQL, R, pandas, NumPy, Excel, Power Query |
+| **Programming & Data Analysis** | Python, SQL, pandas, NumPy, Excel, Power Query |
 | **Machine Learning** | scikit-learn, PyTorch, Keras, classification, regression, CNNs, Transformers, GRU, LSTM |
 | **Data Visualisation & BI** | Streamlit, Plotly, Matplotlib, Tableau, Power BI |
 | **Statistical & Risk Modelling** | Statistical baselines, temporal modelling, probabilistic forecasting, frequency–severity analysis |
@@ -203,7 +210,7 @@ Use the Streamlit sidebar to navigate through the project pages.
 
 The portfolio combines research case studies and an interactive data application.
 
-- **Cyber Risk:** Reported experimental results originate from the research studies. Charts illustrate documented findings rather than retraining the underlying models inside the portfolio.
+- **Cyber Risk:** Results come from the accepted conference paper and the revised journal manuscript. The conference and journal classification experiments use **different evaluation protocols**, so their accuracy figures are not directly comparable. Frequency forecasting and financial-risk analysis concern distinct tasks. Charts show documented findings rather than retraining the models in the portfolio. Financial figures depend on synthetic-time, event-to-loss, and severity assumptions; extreme-tail estimates may be numerically unstable. URLhaus did not demonstrate reproducible prospective forecast skill.
 - **Sports Broadcast:** The page describes industry workflow contributions and project scope. It does not claim independently verified sponsorship ROI or campaign impact.
 - **Food101:** Model results reflect the reported transfer-learning experiments. The portfolio does not provide an interactive CNN training pipeline.
 - **Retail Intelligence:** Sales and RFM metrics are calculated from transaction data. The predictive page trains and evaluates models on historical customer snapshots when requested.
@@ -231,7 +238,9 @@ For Retail Intelligence, the historical dataset does not establish contractual c
 - [ ] GitHub, LinkedIn, and email links are accurate.
 - [ ] Charts and text are readable on desktop and mobile.
 - [ ] Retail Intelligence loads the dataset and completes model evaluation.
-- [ ] Research figures and publication statuses remain accurate.
+- [ ] Cyber Risk figures match the final papers (conference THP **90.23%**, journal chronological classification **45.40%** versus **46.87%** majority reference, Rolling Mean test MAE **6.9875**).
+- [ ] Both papers are labelled **Accepted**, not published, unless their publication status is independently updated.
+- [ ] Research results distinguish different evaluation protocols, synthetic scenarios, and observational URLhaus findings.
 - [ ] `requirements.txt` includes all required dependencies.
 - [ ] No passwords, tokens, `.env` files, or Streamlit secrets are committed.
 - [ ] The deployed application has been tested after the latest GitHub push.
@@ -243,6 +252,7 @@ For Retail Intelligence, the historical dataset does not establish contractual c
 **Thomas Nguyen**  
 Data Science · Machine Learning · Business Analytics
 
+**Portfolio:** https://thomas-nguyen-portfolio-m8x9p996ygqgagwxpfzzpg.streamlit.app/  
 **Email:** thomas.nttn.au@gmail.com  
 **LinkedIn:** https://www.linkedin.com/in/thomas-tuan-nguyen/  
 **GitHub:** https://github.com/ThomasNguyennnnn
