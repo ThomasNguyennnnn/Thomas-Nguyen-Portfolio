@@ -1315,21 +1315,20 @@ with left:
         ),
 
         description=(
-            "Two-phase research investigating cyber-event "
-            "dependence, entity-risk prediction, numerical "
-            "frequency forecasting, and aggregate-loss risk."
+            "Two connected studies of top-risk entity prediction, "
+            "chronological re-evaluation, system-wide frequency "
+            "forecasting, and conditional cyber-loss scenarios."
         ),
 
         skills=(
-            "Python · Hawkes Processes · Transformers · "
-            "GRU · Statistical Modelling"
+            "Python · Hawkes Processes · THP · GRU–NB · "
+            "Frequency–Severity Modelling"
         ),
 
         result=(
-            "89.13% top-risk entity accuracy in Phase 1. "
-            "Phase 2 compared system-wide frequency models "
-            "and extended the research to loss severity "
-            "and aggregate risk."
+            "AusDM: THP achieved 90.23% top-risk accuracy. "
+            "Revised journal: Rolling Mean had the lowest "
+            "primary frequency test MAE (6.9875)."
         ),
 
         result_label="Research Evidence",

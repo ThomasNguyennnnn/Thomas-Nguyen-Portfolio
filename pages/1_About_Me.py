@@ -1208,55 +1208,74 @@ research_cards = [
     research_card(
         label="Phase 1 · Conference",
         status="Accepted",
-        title="A Hawkes–Transformer Model for Cyber Risk Prediction",
+        title=(
+            "A Hawkes–Transformer Model for Cyber Risk Prediction: "
+            "Comparative Evaluation on a Synthetic Hawkes Benchmark"
+        ),
         description="""
-        Research on short-horizon cyber-risk prediction
-        using a synthetic multivariate marked Hawkes
-        benchmark with six interacting entities.
-        Compared Transformer Hawkes Process,
-        Neural Hawkes-based models, statistical baselines,
-        and retrieval-style approaches to predict the
-        highest-risk entity in the next time window.
+        Compared Transformer Hawkes Process (THP),
+        supervised GRU, a likelihood-based Neural
+        Hawkes-style baseline, Poisson counts, and
+        MCP-Titan on a six-entity synthetic marked
+        Hawkes benchmark. The primary target identified
+        the most active entity in the next five
+        simulator-time units.
         """,
         methods="""
-        Hawkes Processes · Transformer Models ·
-        Neural Hawkes · Temporal Dependence ·
-        Controlled Model Evaluation
+        Hawkes Processes · THP · GRU ·
+        Temporal Point Processes · Model Comparison
         """,
         outcome="""
-        Accepted at AusDM 2026. The Transformer Hawkes
-        Process achieved 0.8913 accuracy on the primary
-        top-risk entity task within the synthetic benchmark.
+        Accepted at AusDM 2026. Under the conference
+        evaluation protocol, THP achieved 90.23%
+        top-risk accuracy, 0.8951 macro-F1, and
+        0.9940 top-3 accuracy. These results belong
+        to the controlled synthetic benchmark.
         """
     ),
 
     research_card(
         label="Phase 2 · Journal",
         status="Accepted",
-        title="Cyber Risk Frequency–Severity Modelling",
+        title=(
+            "From Cyber-Risk Prediction to Loss Quantification: "
+            "A Task-Aware Frequency–Severity Framework with "
+            "Hawkes Benchmarking and External Evaluation"
+        ),
         description="""
-        Extended the cyber-risk research toward
-        system-wide event frequency, monetary loss severity,
-        and aggregate cyber-risk assessment. Reconstructed
-        the frequency target from the synthetic Hawkes
-        event stream and independently calibrated severity
-        assumptions using published cyber-loss information.
+        Extended the study to chronological,
+        boundary-purged entity classification,
+        three-unit system-wide event-frequency
+        forecasting, independently calibrated monetary
+        severity, conditional aggregate-loss scenarios,
+        and URLhaus external evaluation.
         """,
         methods="""
-        Count Modelling · Frequency–Severity Framework ·
-        Aggregate Loss · VaR · TVaR · Model Validation
+        Chronological Validation · GRU–NB · Rolling Mean ·
+        Frequency–Severity Analysis · VaR / TVaR · URLhaus
         """,
         outcome="""
-        Accepted by the MDPI journal Risks.
-        The work considers aggregate loss and tail-risk
-        measures while recognising the limitations
-        of synthetic data and frequency forecasting.
+        Accepted by MDPI Risks. Chronological
+        classification reached 45.40% at best among
+        fitted models, below the 46.87% majority
+        reference. GRU–NB was validation-selected for
+        frequency, while Rolling Mean had the lowest
+        primary test MAE (6.9875). Financial estimates
+        are conditional scenarios, not observed claims.
         """
     )
 
 ]
 
 render_grid("grid-2", research_cards)
+
+st.caption(
+    "Evaluation note: AusDM 2026 used a stratified random split, "
+    "whereas the revised journal study used chronological, "
+    "boundary-purged evaluation. Their accuracy figures are "
+    "not directly comparable. URLhaus did not establish "
+    "reproducible prospective forecasting skill."
+)
 
 
 # ============================================================
@@ -1466,11 +1485,11 @@ direction_cards = [
         "Research-Led Data Science",
         "Temporal Modelling · Cyber Risk · Statistical Evaluation",
         """
-        Building on my accepted cyber-risk research
-        through deeper understanding of model validation,
-        temporal dependence, probabilistic modelling,
-        uncertainty, and the relationship between
-        advanced methods and practical use.
+        Building on two accepted cyber-risk papers
+        through careful chronological evaluation,
+        multiple-trajectory robustness, probabilistic
+        modelling, and transparent financial-risk
+        assumptions and limitations.
         """
     ),
 
