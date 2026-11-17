@@ -1,6 +1,7 @@
 
 import streamlit as st
 import plotly.graph_objects as go
+import pandas as pd
 from textwrap import dedent
 from html import escape
 
@@ -349,74 +350,6 @@ def show_chart(fig, height=390):
     )
 
 
-# ============================================================
-# RESEARCH DATA — PHASE 1
-# ============================================================
-
-phase1_results = [
-    ["Poisson baseline", "0.3873", "0.2290", "0.3470", "—", "—"],
-    ["Supervised GRU/LSTM", "0.8621", "0.8565", "0.8625", "0.9598", "0.9893"],
-    ["Real Neural Hawkes Process", "0.2753", "0.0987", "0.1426", "0.4773", "0.6667"],
-    ["Transformer Hawkes Process", "0.8913", "0.8436", "0.8519", "0.9700", "0.9887"],
-    ["MCP-Titan", "0.2567", "0.2206", "0.2491", "0.4873", "0.6400"]
-]
-
-
-# ============================================================
-# RESEARCH DATA — PHASE 2
-# ============================================================
-
-# Manuscript Table 2 — Seven-model frequency comparison
-
-frequency_results = [
-    ["Persistence", "8.1467", "9.7221", "3.6880", "1.0215", "0.1361", "0.1385"],
-    ["Poisson Regression", "8.1231", "9.9985", "3.9491", "0.8848", "0.1341", "0.1713"],
-    ["Negative Binomial Regression", "8.1244", "10.0026", "3.7909", "0.8850", "0.1341", "0.1705"],
-    ["GRU", "6.6968", "8.2853", "3.8757", "0.9180", "0.2436", "0.2369"],
-    ["LSTM", "7.2260", "8.9889", "3.9028", "0.8983", "0.1955", "0.1874"],
-    ["THP–Poisson", "8.7495", "10.9228", "4.2372", "0.8896", "0.0568", "0.0679"],
-    ["THP–NB", "8.7831", "10.9580", "4.0150", "0.8822", "0.0719", "0.0856"]
-]
-
-# Manuscript Table 3 — Independent synthetic evaluation
-
-independent_results = [
-    ["GRU Ensemble", "6.6944", "8.5200", "3.5549", "0.9944", "0.5364", "0.5460", "0.3947"],
-    ["Previous-window Persistence", "8.1197", "10.3254", "3.7782", "1.0236", "0.4755", "0.4937", "1.0024"]
-]
-
-# Manuscript Table 4 — Monetary severity
-
-severity_results = [
-    ["0.25", "0.888485", "1.916074", "2.958632", "6.06e-5", "9.12e-9"],
-    ["0.50", "0.888485", "1.737200", "3.211599", "2.29e-4", "2.19e-6"],
-    ["0.75", "0.888485", "1.449305", "3.534421", "3.17e-4", "1.34e-5"]
-]
-
-# Manuscript Table 5 — Compound-loss sensitivity
-
-aggregate_results = [
-    ["Low", "30.958", "0.25", "8.173", "16.983", "19.451"],
-    ["Low", "30.958", "0.50", "8.173", "18.260", "25.979"],
-    ["Low", "30.958", "0.75", "8.173", "18.846", "43.333"],
-    ["Median", "41.112", "0.25", "10.854", "21.024", "23.760"],
-    ["Median", "41.112", "0.50", "10.854", "22.689", "31.599"],
-    ["Median", "41.112", "0.75", "10.854", "23.861", "53.584"],
-    ["High", "48.233", "0.25", "12.734", "23.836", "26.616"],
-    ["High", "48.233", "0.50", "12.734", "25.681", "35.172"],
-    ["High", "48.233", "0.75", "12.734", "27.299", "59.986"]
-]
-
-# Manuscript Table 6 — URLhaus external evaluation
-
-urlhaus_results = [
-    ["Mean Baseline", "254.620", "281.337", "0.5491", "0.6067", "0.0000"],
-    ["Poisson Regression", "260.939", "303.843", "0.5627", "0.6553", "-0.2383"],
-    ["Persistence", "283.606", "630.167", "0.6116", "1.3590", "-0.0295"],
-    ["Negative Binomial Regression", "287.973", "343.009", "0.6210", "0.7397", "-0.0795"],
-    ["THP Count Model", "416.519", "434.606", "0.8982", "0.9373", "-0.0865"]
-]
-
 
 # ============================================================
 # CSS — CONSISTENT LIGHT FUTURISTIC DESIGN
@@ -457,7 +390,7 @@ st.markdown(
 }
 
 .block-container {
-    padding-top: 3.5rem;
+    padding-top: 5.5rem;
     padding-bottom: 4rem;
     max-width: 1280px;
 }
@@ -1025,7 +958,7 @@ div.stLinkButton > a * {
 @media (max-width: 760px) {
 
     .block-container {
-        padding-top: 2rem;
+        padding-top: 4.5rem;
     }
 
     .hero-card {
@@ -1060,1520 +993,558 @@ div.stLinkButton > a * {
 )
 
 
+
 # ============================================================
-# 1. HERO
+# FINAL MANUSCRIPT RESULTS — SOURCE-ALIGNED
+# ============================================================
+
+# Conference manuscript, Section 5 / Table 1 (14-page AusDM PDF).
+# The main task is top-risk entity over the next FIVE simulator units.
+CONFERENCE_RESULTS = [
+    {"Model": "Poisson baseline", "Accuracy": 0.3873, "Macro-F1": 0.2290, "Weighted-F1": 0.3470, "Top-2": None, "Top-3": None, "Severity": 0.3307, "Time": 0.2553},
+    {"Model": "Hawkes-informed supervised GRU", "Accuracy": 0.8621, "Macro-F1": 0.8565, "Weighted-F1": 0.8625, "Top-2": 0.9598, "Top-3": 0.9893, "Severity": 0.3414, "Time": 0.3956},
+    {"Model": "Likelihood-based Neural Hawkes-style", "Accuracy": 0.2753, "Macro-F1": 0.0987, "Weighted-F1": 0.1426, "Top-2": 0.4773, "Top-3": 0.6667, "Severity": 0.3327, "Time": 0.3520},
+    {"Model": "Transformer Hawkes Process", "Accuracy": 0.9023, "Macro-F1": 0.8951, "Weighted-F1": 0.9024, "Top-2": 0.9839, "Top-3": 0.9940, "Severity": 0.3400, "Time": 0.3809},
+    {"Model": "MCP-Titan retrieval", "Accuracy": 0.2567, "Macro-F1": 0.2206, "Weighted-F1": 0.2491, "Top-2": 0.4873, "Top-3": 0.6400, "Severity": 0.3560, "Time": 0.3700},
+]
+
+# Revised Risks manuscript, Section 5.1 / Table 1.
+# This is a NEW chronological, boundary-purged evaluation, not a
+# second estimate of the AusDM random-split experimental design.
+JOURNAL_CLASSIFICATION = [
+    {"Model": "Poisson baseline", "Accuracy": 0.3940, "Macro-F1": 0.1332, "Weighted-F1": 0.3176, "Top-2": 0.5160, "Top-3": 0.6967},
+    {"Model": "Hawkes-informed supervised GRU", "Accuracy": 0.3207, "Macro-F1": 0.1975, "Weighted-F1": 0.3384, "Top-2": 0.4867, "Top-3": 0.6453},
+    {"Model": "Likelihood-based Neural Hawkes", "Accuracy": 0.4540, "Macro-F1": 0.1293, "Weighted-F1": 0.3100, "Top-2": 0.5653, "Top-3": 0.6200},
+    {"Model": "Transformer Hawkes Process", "Accuracy": 0.2473, "Macro-F1": 0.1255, "Weighted-F1": 0.2609, "Top-2": 0.4767, "Top-3": 0.6107},
+    {"Model": "MCP-Titan-style retrieval", "Accuracy": 0.0980, "Macro-F1": 0.0298, "Weighted-F1": 0.0175, "Top-2": 0.1120, "Top-3": 0.5807},
+]
+
+# Revised Risks manuscript, Section 5.2 / Table 2.
+FREQUENCY_RESULTS = [
+    {"Model": "Training Mean", "Validation MAE": 10.3629, "Test MAE": 13.3518},
+    {"Model": "Persistence", "Validation MAE": 8.5251, "Test MAE": 8.5654},
+    {"Model": "Rolling Mean (m=8)", "Validation MAE": 6.8173, "Test MAE": 6.9875},
+    {"Model": "Fitted classical Hawkes", "Validation MAE": 6.7673, "Test MAE": 7.2542},
+    {"Model": "Poisson regression", "Validation MAE": 8.0451, "Test MAE": 8.5109},
+    {"Model": "Negative Binomial regression", "Validation MAE": 8.0790, "Test MAE": 8.5257},
+    {"Model": "GRU-NB", "Validation MAE": 6.5815, "Test MAE": 7.4234},
+    {"Model": "LSTM-NB", "Validation MAE": 6.6981, "Test MAE": 7.6139},
+    {"Model": "THP-Poisson", "Validation MAE": 7.1353, "Test MAE": 7.3357},
+    {"Model": "THP-NB", "Validation MAE": 7.3153, "Test MAE": 7.0519},
+]
+
+# Revised Risks manuscript, Section 5.2.3 / Table 3.
+JOINT_TRAJECTORIES = [
+    {"Model": "Training Mean", "J1 MAE": 7.1507, "J2 MAE": 10.9547},
+    {"Model": "Persistence", "J1 MAE": 8.1065, "J2 MAE": 7.4163},
+    {"Model": "Rolling Mean", "J1 MAE": 5.9829, "J2 MAE": 7.3394},
+    {"Model": "Poisson regression", "J1 MAE": 7.3088, "J2 MAE": 7.2629},
+    {"Model": "Negative Binomial regression", "J1 MAE": 7.3249, "J2 MAE": 7.2486},
+    {"Model": "GRU-NB", "J1 MAE": 6.8172, "J2 MAE": 6.7321},
+]
+
+# Revised Risks manuscript, Section 5.3 / Table 4.
+SEVERITY_RESULTS = [
+    {"Specification": "Full lognormal", "VaR99_USD": 1902438, "TVaR99_USD": 2991261, "P10M": 6.90e-5, "P100M": 2.14e-9, "Variance": "Finite"},
+    {"Specification": "Spliced GPD ξ=0.25", "VaR99_USD": 1916074, "TVaR99_USD": 2958632, "P10M": 6.06e-5, "P100M": 9.12e-9, "Variance": "Finite"},
+    {"Specification": "Spliced GPD ξ=0.50", "VaR99_USD": 1737200, "TVaR99_USD": 3211599, "P10M": 2.29e-4, "P100M": 2.19e-6, "Variance": "Infinite"},
+    {"Specification": "Spliced GPD ξ=0.75", "VaR99_USD": 1449305, "TVaR99_USD": 3534421, "P10M": 3.17e-4, "P100M": 1.34e-5, "Variance": "Infinite"},
+]
+
+# Revised Risks manuscript, Section 5.4.1 / Table 5.
+# Values are manuscript-reported rounded summaries, not recomputed estimates.
+THINNING_RESULTS = [
+    {"q": 1.0, "Retained": 47.4318, "P_positive": 0.99999996, "ExpectedLoss": 12521984},
+    {"q": 0.1, "Retained": 4.7432, "P_positive": 0.978037, "ExpectedLoss": 1252198},
+    {"q": 0.01, "Retained": 0.4743, "P_positive": 0.370143, "ExpectedLoss": 125220},
+    {"q": 0.001, "Retained": 0.04743, "P_positive": 0.046206, "ExpectedLoss": 12522},
+    {"q": 0.0001, "Retained": 0.004743, "P_positive": 0.004731, "ExpectedLoss": 1252},
+]
+
+# Revised Risks manuscript, Section 5.4.2; all at q=0.01.
+EXPECTED_LOSS_Q001 = [
+    {"Model": "Training Mean", "USD": 99881},
+    {"Model": "Persistence", "USD": 135346},
+    {"Model": "Rolling Mean", "USD": 128420},
+    {"Model": "Fitted classical Hawkes", "USD": 123077},
+    {"Model": "Poisson regression", "USD": 122203},
+    {"Model": "Negative Binomial regression", "USD": 122599},
+    {"Model": "GRU-NB", "USD": 125220},
+    {"Model": "LSTM-NB", "USD": 124620},
+    {"Model": "THP-Poisson", "USD": 127452},
+    {"Model": "THP-NB", "USD": 131853},
+]
+
+# Revised Risks manuscript, Section 5.4.3 / Table 6.
+COMPOUND_LOSS = [
+    {"Model": "Poisson regression", "Expected loss (USD k)": 122.203, "VaR99 (USD M)": 1.495, "TVaR99 (USD M)": 2.370, "P(L>=10M)": 2.60e-5},
+    {"Model": "Negative Binomial regression", "Expected loss (USD k)": 122.599, "VaR99 (USD M)": 1.497, "TVaR99 (USD M)": 2.374, "P(L>=10M)": 3.10e-5},
+    {"Model": "GRU-NB", "Expected loss (USD k)": 125.220, "VaR99 (USD M)": 1.526, "TVaR99 (USD M)": 2.419, "P(L>=10M)": 3.07e-5},
+    {"Model": "LSTM-NB", "Expected loss (USD k)": 124.620, "VaR99 (USD M)": 1.522, "TVaR99 (USD M)": 2.412, "P(L>=10M)": 2.87e-5},
+    {"Model": "THP-Poisson", "Expected loss (USD k)": 127.452, "VaR99 (USD M)": 1.528, "TVaR99 (USD M)": 2.425, "P(L>=10M)": 3.33e-5},
+    {"Model": "THP-NB", "Expected loss (USD k)": 131.853, "VaR99 (USD M)": 1.573, "TVaR99 (USD M)": 2.478, "P(L>=10M)": 3.93e-5},
+]
+
+# Revised Risks manuscript, Section 5.5 / Table 7.
+URLHAUS_RESULTS = [
+    {"Model": "Training Mean", "MAE": 254.620, "RMSE": 281.337, "NMAE": 0.5491, "NRMSE": 0.6067, "Pearson": None},
+    {"Model": "Poisson regression", "MAE": 260.939, "RMSE": 303.843, "NMAE": 0.5627, "NRMSE": 0.6553, "Pearson": -0.2383},
+    {"Model": "Persistence", "MAE": 283.606, "RMSE": 630.167, "NMAE": 0.6116, "NRMSE": 1.3590, "Pearson": -0.0295},
+    {"Model": "Negative Binomial regression", "MAE": 287.973, "RMSE": 343.009, "NMAE": 0.6210, "NRMSE": 0.7397, "Pearson": -0.0795},
+    {"Model": "THP count model", "MAE": 416.519, "RMSE": 434.606, "NMAE": 0.8982, "NRMSE": 0.9373, "Pearson": -0.0865},
+]
+
+
+# ============================================================
+# ADDITIONAL STYLES FOR REVISED RESEARCH PRESENTATION
+# ============================================================
+
+st.markdown("""
+<style>
+.block-container { padding-top: 5.5rem !important; }
+@media(max-width:760px){.block-container{padding-top:4.5rem !important;}}
+.research-note, .source-note {line-height:1.75;}
+[data-testid="stTabs"] button[data-baseweb="tab"] {
+    color:#475569 !important; font-weight:800 !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+    color:#4338ca !important;
+}
+[data-testid="stDataFrame"] {
+    border:1px solid rgba(129,140,248,.25);
+    border-radius:16px; overflow:hidden;
+}
+.block-container [data-testid="stMarkdownContainer"] > p {color:#334155;}
+.block-container [data-testid="stWidgetLabel"] p {color:#334155 !important;}
+</style>
+""", unsafe_allow_html=True)
+
+
+def frame(rows, columns=None):
+    df = pd.DataFrame(rows)
+    if columns is not None:
+        df = df[columns]
+    return df
+
+
+def table(rows, columns=None, formats=None):
+    df = frame(rows, columns)
+    if formats:
+        display = df.copy()
+        for column, function in formats.items():
+            display[column] = display[column].map(function)
+        st.dataframe(display, use_container_width=True, hide_index=True)
+    else:
+        st.dataframe(df, use_container_width=True, hide_index=True)
+
+
+def caption(text):
+    research_note(text)
+
+
+def bar_chart(names, values, title, unit="", horizontal=True, highlight=None, height=400):
+    colors = [VIOLET if name == highlight else BLUE for name in names]
+    if horizontal:
+        fig = go.Figure(go.Bar(
+            x=values, y=names, orientation="h", marker_color=colors,
+            hovertemplate=f"%{{y}}<br>%{{x:,.4f}} {unit}<extra></extra>",
+        ))
+        fig.update_layout(title=title, xaxis_title=unit or None, yaxis_title=None,
+                          yaxis=dict(autorange="reversed"))
+    else:
+        fig = go.Figure(go.Bar(x=names, y=values, marker_color=colors))
+        fig.update_layout(title=title, yaxis_title=unit or None)
+    show_chart(fig, height=height)
+
+
+def kpi(cards):
+    render_grid("grid-4", [metric_card(*card) for card in cards])
+
+
+# ============================================================
+# HERO & RESEARCH SUMMARY
 # ============================================================
 
 render_html("""
-    <div class="hero-card">
-
-        <div class="eyebrow">
-            Academic Research · AusDM 2026 · MDPI Risks
-        </div>
-
-        <div class="page-title">
-            Cyber Risk
-            <span class="gradient-text">
-                Modelling &amp; Forecasting
-            </span>
-        </div>
-
-        <div class="subtitle">
-            Hawkes Processes · Transformers ·
-            Frequency–Severity Modelling ·
-            Aggregate Cyber-Loss Analysis
-        </div>
-
-        <div class="body-text">
-
-            <p>
-                My cyber-risk research investigates
-                <b>event clustering, temporal dependence,
-                and interactions between entities</b>
-                using Hawkes processes, neural sequence
-                models, and statistical methods.
-            </p>
-
-            <p>
-                <b>Phase 1</b> focused on short-horizon
-                top-risk entity prediction using a synthetic
-                multivariate marked Hawkes benchmark.
-                The Transformer Hawkes Process achieved
-                <b>89.13% accuracy</b> on the
-                primary classification task.
-            </p>
-
-            <p>
-                <b>Phase 2</b> extended the work to
-                system-wide event frequency, independent
-                monetary severity modelling, and
-                aggregate cyber-loss analysis.
-                The GRU model reduced MAE by approximately
-                <b>17.6%</b> relative to persistence
-                on an independent synthetic trajectory.
-            </p>
-
-            <p>
-                The actuarial extension demonstrated
-                that equal-mean severity distributions
-                can produce substantially different
-                extreme-loss outcomes.
-                URLhaus external evaluation also revealed
-                important limits to synthetic-to-real
-                forecasting transfer.
-            </p>
-
-            <p>
-                The research has produced two accepted
-                outputs: an <b>AusDM 2026 conference
-                paper</b> and a journal manuscript
-                accepted by <b>MDPI <i>Risks</i></b>.
-            </p>
-
-        </div>
-
-        <div class="hero-tags">
-            <span class="hero-tag">Cyber Risk</span>
-            <span class="hero-tag">Hawkes Processes</span>
-            <span class="hero-tag">Transformers</span>
-            <span class="hero-tag">GRU / LSTM</span>
-            <span class="hero-tag">Count Forecasting</span>
-            <span class="hero-tag">Monetary Severity</span>
-            <span class="hero-tag">VaR / TVaR</span>
-            <span class="hero-tag">URLhaus</span>
-            <span class="hero-tag">Research Validation</span>
-        </div>
-
+<div class="hero-card">
+    <div class="eyebrow">Two connected research studies · AusDM 2026 · MDPI Risks · Accepted</div>
+    <div class="page-title">Cyber Risk <span class="gradient-text">Modelling &amp; Forecasting</span></div>
+    <div class="subtitle">From top-risk entity prediction to event frequency, monetary severity and conditional aggregate loss</div>
+    <div class="body-text">
+        <p>My cyber-risk research investigates <b>temporal clustering, self-excitation and cross-entity dependence</b> using Hawkes processes, neural sequence models and statistical benchmarks. The project has produced two accepted research papers: an <b>AusDM 2026 conference study</b> and a <b>journal paper accepted by MDPI <i>Risks</i></b>.</p>
+        <p><b>Phase 1</b> examines which of six cyber entities is likely to accumulate the most activity over a future five-unit risk window. Under the conference protocol, the Transformer Hawkes Process (THP) achieved <b>90.23% top-risk entity accuracy</b> on the controlled synthetic benchmark.</p>
+        <p><b>Phase 2</b> extends the work to task-aware chronological re-evaluation, system-wide frequency forecasting, separately calibrated monetary severity, conditional aggregate loss and URLhaus external testing. Its results also reveal the limits of relying on complex models without strong baselines and robust validation.</p>
+        <p>All reported scores belong to <b>their own data, target and evaluation protocol</b>; neither conference classification performance nor synthetic financial scenarios should be presented as real-world insurance prediction performance.</p>
     </div>
+    <div class="hero-tags">
+        <span class="hero-tag">Hawkes Processes</span><span class="hero-tag">Temporal Prediction</span>
+        <span class="hero-tag">Transformer &amp; GRU</span><span class="hero-tag">Chronological Validation</span>
+        <span class="hero-tag">Frequency–Severity Risk</span><span class="hero-tag">URLhaus External Evaluation</span>
+    </div>
+</div>
 """)
 
-
-# ============================================================
-# 2. RESEARCH SNAPSHOT
-# ============================================================
-
 section_heading(
-    "Research Snapshot",
-    "Quantitative highlights from Phase 1 and Phase 2."
+    "Research at a Glance",
+    "Figures below come from different tasks and must not be compared as if they share a common test protocol.",
 )
 
-render_grid("grid-4", [
-    metric_card(
-        "89.13%",
-        "Phase 1 THP Accuracy",
-        "Top-risk entity classification on the synthetic benchmark."
-    ),
-    metric_card(
-        "17.6%",
-        "Phase 2 MAE Reduction",
-        "Independent GRU evaluation against persistence."
-    ),
-    metric_card(
-        "US$264K",
-        "Mean Monetary Severity",
-        "Separately calibrated incident-cost assumption."
-    ),
-    metric_card(
-        "US$53.584M",
-        "Aggregate TVaR 99%",
-        "Median frequency with the heaviest severity tail."
-    )
+kpi([
+    ("90.23%", "AusDM top-risk accuracy", "THP · conference benchmark · h = 5"),
+    ("45.40%", "Journal re-evaluation", "Best fitted-model accuracy; majority reference = 46.87%"),
+    ("6.9875", "Frequency test MAE", "Rolling Mean · primary synthetic trajectory"),
+    ("USD 125,220", "Conditional expected loss", "GRU-NB · q = 0.01 · one dimensionless window"),
+])
+
+caption("<b>Publication status:</b> Both Phase 1 (AusDM 2026) and Phase 2 (MDPI <i>Risks</i>) are reported as <b>accepted</b>. Numerical results for Phase 2 come from the supplied 13 November 2026 revised manuscript. Neither work is labelled published without a confirmed publication record.")
+
+
+# ============================================================
+# TABBED RESEARCH EXPLORER
+# ============================================================
+
+tab_overview, tab_conference, tab_recheck, tab_frequency, tab_financial, tab_external = st.tabs([
+    "🧭 Overview",
+    "🏆 Conference study",
+    "🔎 Journal re-evaluation",
+    "📈 Frequency forecasts",
+    "💰 Financial scenarios",
+    "🌐 URLhaus & limitations",
 ])
 
 
-# ============================================================
-# 3. RESEARCH PUBLICATIONS
-# ============================================================
-
-section_heading(
-    "Research Publications",
-    "Two research phases with distinct analytical objectives."
-)
-
-render_grid("grid-2", [
-
-    publication_card(
-        "Phase 1 · Conference",
-        "Accepted",
-        "A Hawkes–Transformer Model for Cyber Risk Prediction: "
-        "Comparative Evaluation on a Synthetic Hawkes Benchmark",
-        """
-        Investigated short-horizon top-risk entity
-        prediction using a six-entity marked Hawkes
-        benchmark, comparing statistical,
-        recurrent, Transformer, likelihood-based,
-        and retrieval approaches.
-        """,
-        """
-        AusDM 2026 · Accepted.
-        THP classification accuracy: 0.8913.
-        """
-    ),
-
-    publication_card(
-        "Phase 2 · Journal",
-        "Accepted",
-        "From Cyber-Risk Prediction to Loss Quantification: "
-        "A Task-Aware Frequency–Severity Framework with "
-        "Hawkes Benchmarking and External Evaluation",
-        """
-        Extended the original work to
-        event-frequency forecasting,
-        monetary severity calibration,
-        conditional compound-loss modelling,
-        and URLhaus external evaluation.
-        """,
-        """
-        MDPI Risks · Accepted.
-        Independent GRU MAE: 6.6944.
-        Median-frequency TVaR 99%:
-        US$23.760M–US$53.584M.
-        """
+with tab_overview:
+    section_heading("One benchmark, distinct research questions", "A research programme connecting predictive targets without treating them as interchangeable.")
+    section_heading(
+        "Research Problem",
+        "Why cyber risk needs temporal, network-aware and financially qualified models.",
     )
-])
-
-research_note("""
-    <b>Publication status:</b>
-    Both papers are identified as accepted.
-    Final publication links can be added once confirmed.
-    Numerical results below are research findings,
-    not simulated portfolio performance claims.
-""")
-
-
-# ============================================================
-# 4. RESEARCH PROBLEM
-# ============================================================
-
-section_heading(
-    "Research Problem",
-    "Cyber risk involves temporal clustering, interconnected systems, "
-    "and uncertain financial consequences."
-)
-
-render_grid("grid-3", [
-
-    info_card(
-        "Temporal Dependence",
-        "Cyber incidents may cluster over time",
-        """
-        Incident arrivals can be temporally related.
-        Recent history, timing, and event sequences
-        may contain useful information about
-        future activity.
-        """
-    ),
-
-    info_card(
-        "Cross-Entity Dependence",
-        "Risk can propagate across connected systems",
-        """
-        Shared infrastructure and technological
-        dependencies may create concentrated
-        exposure across several entities.
-        """
-    ),
-
-    info_card(
-        "Financial Consequences",
-        "Technical activity is not equivalent to monetary loss",
-        """
-        Event counts, loss-producing incidents,
-        and monetary severity must be distinguished
-        before aggregate financial risk can
-        be interpreted.
-        """
-    )
-])
-
-
-# ============================================================
-# 5. RESEARCH FRAMEWORK
-# ============================================================
-
-section_heading(
-    "Research Framework",
-    "How the study progresses from event dependence "
-    "to risk prediction and loss quantification."
-)
-
-render_grid("grid-4", [
-
-    process_card(
-        "01",
-        "Synthetic Hawkes Benchmark",
-        """
-        Construct six interacting event streams
-        with self-excitation, cross-entity effects,
-        time-varying background intensity,
-        and event-specific marks.
-        """
-    ),
-
-    process_card(
-        "02",
-        "Phase 1: Entity Ranking",
-        """
-        Predict which entity accumulates
-        the greatest future activity over
-        the next five simulator time units.
-        """
-    ),
-
-    process_card(
-        "03",
-        "Phase 2: Frequency Prediction",
-        """
-        Reconstruct total future event counts
-        across the six-entity system
-        within the next three simulator
-        time units.
-        """
-    ),
-
-    process_card(
-        "04",
-        "Financial Risk Analysis",
-        """
-        Combine a probabilistic frequency
-        specification with independently
-        calibrated severity assumptions
-        to estimate conditional aggregate-loss
-        and tail-risk measures.
-        """
-    )
-])
-
-research_note("""
-    <b>Target distinction:</b>
-    Phase 1 predicts the highest-risk entity;
-    Phase 2 predicts total system-wide frequency.
-    Synthetic simulator time units are not
-    real calendar hours, days, or insurance years.
-""")
-
-
-# ============================================================
-# 6. SYNTHETIC HAWKES BENCHMARK
-# ============================================================
-
-section_heading(
-    "Synthetic Hawkes Benchmark",
-    "A controlled event-generation environment "
-    "for investigating temporal and cross-entity dependence."
-)
-
-render_grid("grid-4", [
-
-    metric_card(
-        "6",
-        "Entities",
-        "Interacting event streams."
-    ),
-
-    metric_card(
-        "10,000",
-        "Benchmark Events",
-        "Retained trajectory in the journal study."
-    ),
-
-    metric_card(
-        "0.92125",
-        "Kernel Mass",
-        "Integral of the excitation kernel."
-    ),
-
-    metric_card(
-        "0.3408",
-        "Spectral Radius",
-        "Reference branching diagnostic."
-    )
-])
-
-render_grid("grid-3", [
-
-    info_card(
-        "Data Structure",
-        "Multivariate marked Hawkes process",
-        """
-        Each event includes entity identity,
-        occurrence time, synthetic mark,
-        and excitation-related information.
-        """
-    ),
-
-    info_card(
-        "Network Behaviour",
-        "Directional interaction effects",
-        """
-        The simulation incorporates
-        self-excitation, forward propagation,
-        weaker reverse effects, and
-        second-hop interactions.
-        """
-    ),
-
-    info_card(
-        "Scientific Interpretation",
-        "Controlled benchmark, not real claims",
-        """
-        Synthetic marks represent excitation
-        behaviour and do not correspond
-        to actual monetary cyber losses.
-        """
-    )
-])
-
-
-# ============================================================
-# 7. PHASE 1 RESULTS
-# ============================================================
-
-section_heading(
-    "Phase 1 — Model Comparison",
-    "Top-risk entity classification on the "
-    "synthetic Hawkes benchmark."
-)
-
-render_html(
-    data_table(
-        [
-            "Model",
-            "Main Accuracy",
-            "Macro-F1",
-            "Weighted-F1",
-            "Top-2",
-            "Top-3"
-        ],
-        phase1_results,
-        highlight_rows=[3]
-    )
-)
-
-source_note("""
-    Phase 1 conference study results.
-    The task concerns top-risk entity classification,
-    not numerical frequency prediction.
-""")
-
-render_grid("grid-4", [
-
-    metric_card(
-        "0.8913",
-        "THP Accuracy",
-        "Highest primary-task accuracy."
-    ),
-
-    metric_card(
-        "0.8621",
-        "GRU/LSTM Accuracy",
-        "Competitive supervised recurrent model."
-    ),
-
-    metric_card(
-        "0.9700",
-        "THP Top-2",
-        "Correct entity within top two predictions."
-    ),
-
-    metric_card(
-        "0.9887",
-        "THP Top-3",
-        "Correct entity within top three predictions."
-    )
-])
-
-render_html(
-    highlight_panel(
-        "Phase 1 — Main Finding",
-        """
-        The <b>Transformer Hawkes Process</b>
-        achieved the highest accuracy
-        on the primary synthetic
-        top-risk entity classification task.
-
-        The supervised GRU/LSTM model
-        remained competitive and produced
-        higher macro-F1 and weighted-F1
-        scores in the reported comparison.
-
-        The results demonstrate learnable
-        temporal structure within the
-        controlled synthetic environment.
-        """
-    )
-)
-
-
-# ============================================================
-# 8. PHASE 2 RESEARCH OBJECTIVES
-# ============================================================
-
-section_heading(
-    "Phase 2 — Research Objectives",
-    "Extending the earlier classification study "
-    "to event frequency and monetary risk."
-)
-
-render_grid("grid-3", [
-
-    info_card(
-        "Frequency",
-        "System-wide count forecasting",
-        """
-        Predict the number of events occurring
-        across all six entities within
-        the fixed future window (t,t+3].
-        """
-    ),
-
-    info_card(
-        "Severity",
-        "Independent financial-loss modelling",
-        """
-        Use external cyber-loss information
-        to calibrate monetary severity
-        separately from synthetic marks.
-        """
-    ),
-
-    info_card(
-        "Aggregate Loss",
-        "Expected and extreme financial outcomes",
-        """
-        Evaluate expected aggregate cost,
-        VaR, TVaR, and exceedance probabilities
-        under different assumptions.
-        """
-    )
-])
-
-
-# ============================================================
-# 9. PHASE 2 FREQUENCY RESULTS
-# ============================================================
-
-section_heading(
-    "Phase 2 — Frequency Model Comparison",
-    "Seven models evaluated on 1,452 chronological validation origins."
-)
-
-render_grid("grid-4", [
-
-    metric_card(
-        "1,452",
-        "Validation Origins",
-        "Common chronological evaluation sample."
-    ),
-
-    metric_card(
-        "6.6968",
-        "GRU MAE",
-        "Lowest point-prediction error."
-    ),
-
-    metric_card(
-        "8.2853",
-        "GRU RMSE",
-        "Lowest squared-error measure."
-    ),
-
-    metric_card(
-        "0.2436",
-        "GRU Pearson",
-        "Highest correlation in the comparison."
-    )
-])
-
-render_html(
-    data_table(
-        [
-            "Model",
-            "MAE ↓",
-            "RMSE ↓",
-            "NLL ↓",
-            "Calibration",
-            "Pearson ↑",
-            "Spearman ↑"
-        ],
-        frequency_results,
-        highlight_rows=[3]
-    )
-)
-
-source_note("""
-    Risks manuscript, Table 2, page 30.
-    Lower MAE, RMSE, and NLL are preferred;
-    calibration should be close to 1.
-""")
-
-# ------------------------------------------------------------
-# CHART 1 — FREQUENCY MAE
-# ------------------------------------------------------------
-
-frequency_names = [row[0] for row in frequency_results]
-frequency_mae = [float(row[1]) for row in frequency_results]
-
-fig = go.Figure()
-
-fig.add_trace(
-    go.Bar(
-        x=frequency_mae,
-        y=frequency_names,
-        orientation="h",
-
-        marker_color=[
-            VIOLET if name == "GRU" else BLUE
-            for name in frequency_names
-        ],
-
-        text=[
-            f"{value:.3f}"
-            for value in frequency_mae
-        ],
-
-        textposition="outside",
-
-        hovertemplate=(
-            "%{y}<br>"
-            "MAE: %{x:.4f}"
-            "<extra></extra>"
-        )
-    )
-)
-
-fig.update_layout(
-    title="Phase 2 frequency comparison — Mean absolute error",
-    showlegend=False,
-    xaxis_title="MAE (events)",
-    yaxis_title=None,
-    xaxis_range=[0, 11],
-    yaxis=dict(autorange="reversed")
-)
-
-show_chart(fig, height=420)
-
-render_html(
-    highlight_panel(
-        "Frequency Comparison — Key Finding",
-        """
-        The <b>GRU</b> achieved the lowest
-        validation MAE (<b>6.6968</b>) and
-        RMSE (<b>8.2853</b>).
-
-        Persistence achieved the lowest
-        negative log-likelihood
-        (<b>3.6880</b>) and mean calibration
-        closest to one (<b>1.0215</b>).
-
-        No single model dominated all metrics,
-        so independent validation was needed.
-        """
-    )
-)
-
-
-# ============================================================
-# 10. INDEPENDENT GRU EVALUATION
-# ============================================================
-
-section_heading(
-    "Phase 2 — Independent GRU Evaluation",
-    "Testing the selected model on a separately "
-    "generated synthetic trajectory."
-)
-
-render_grid("grid-4", [
-
-    metric_card(
-        "9,885",
-        "Forecast Origins",
-        "Independent synthetic evaluation."
-    ),
-
-    metric_card(
-        "6.6944",
-        "GRU MAE",
-        "Persistence MAE: 8.1197."
-    ),
-
-    metric_card(
-        "17.6%",
-        "MAE Reduction",
-        "Relative improvement over persistence."
-    ),
-
-    metric_card(
-        "0.5364",
-        "Pearson Correlation",
-        "Positive forecast–outcome association."
-    )
-])
-
-render_html(
-    data_table(
-        [
-            "Model",
-            "MAE",
-            "RMSE",
-            "NLL",
-            "Calibration",
-            "Pearson",
-            "Spearman",
-            "Variance Ratio"
-        ],
-        independent_results,
-        highlight_rows=[0]
-    )
-)
-
-source_note("""
-    Risks manuscript, Table 3, page 31.
-    GRU is an equal-weight ensemble of three random seeds.
-    Both predictive distributions use the common
-    Negative Binomial specification.
-""")
-
-# ------------------------------------------------------------
-# CHART 2 — GRU VS PERSISTENCE
-# ------------------------------------------------------------
-
-fig = go.Figure()
-
-fig.add_trace(
-    go.Bar(
-        name="GRU Ensemble",
-        x=["MAE", "RMSE"],
-        y=[6.6944, 8.5200],
-        marker_color=VIOLET,
-        text=["6.6944", "8.5200"],
-        textposition="outside"
-    )
-)
-
-fig.add_trace(
-    go.Bar(
-        name="Persistence",
-        x=["MAE", "RMSE"],
-        y=[8.1197, 10.3254],
-        marker_color=CYAN,
-        text=["8.1197", "10.3254"],
-        textposition="outside"
-    )
-)
-
-fig.update_layout(
-    title="Independent synthetic evaluation — GRU vs persistence",
-    barmode="group",
-    yaxis_title="Prediction error (events)",
-    yaxis_range=[0, 12]
-)
-
-show_chart(fig, height=410)
-
-render_grid("grid-3", [
-
-    info_card(
-        "Bootstrap Evidence",
-        "MAE improvement: −1.417 events",
-        """
-        Paired moving-block bootstrap
-        95% interval:
-        [−1.829, −0.998].
-        """
-    ),
-
-    info_card(
-        "Prediction Intervals",
-        "95% coverage: 0.954",
-        """
-        GRU empirical coverage was
-        0.829, 0.912, and 0.954
-        for nominal 80%, 90%,
-        and 95% intervals.
-        """
-    ),
-
-    info_card(
-        "Model Limitation",
-        "Variance ratio: 0.3947",
-        """
-        Conditional-mean predictions
-        were less variable than realised
-        event counts, with extreme
-        outcomes pulled toward the centre.
-        """
-    )
-])
-
-render_html(
-    highlight_panel(
-        "Independent Evaluation — Main Result",
-        """
-        GRU reproduced its improvement
-        over persistence on the
-        independent synthetic trajectory.
-
-        MAE declined by approximately
-        <b>17.6%</b> and RMSE by
-        <b>17.5%</b>.
-
-        NLL, calibration, and correlation
-        also improved.
-
-        However, compressed forecast
-        variability remained a limitation,
-        and this does not establish
-        equivalent real-world performance.
-        """
-    )
-)
-
-
-# ============================================================
-# 11. MONETARY SEVERITY
-# ============================================================
-
-section_heading(
-    "Phase 2 — Monetary Severity",
-    "Independent severity calibration and "
-    "equal-mean tail sensitivity analysis."
-)
-
-render_grid("grid-4", [
-
-    metric_card(
-        "US$264K",
-        "Mean Severity",
-        "Held constant across tail scenarios."
-    ),
-
-    metric_card(
-        "US$1M",
-        "Tail Threshold",
-        "Generalised Pareto tail splice."
-    ),
-
-    metric_card(
-        "4%",
-        "Tail Entry Probability",
-        "Probability of entering the upper-loss tail."
-    ),
-
-    metric_card(
-        "3",
-        "Tail Scenarios",
-        "GPD shape: 0.25, 0.50, 0.75."
-    )
-])
-
-render_html(
-    data_table(
-        [
-            "GPD Shape",
-            "VaR 95% (US$M)",
-            "VaR 99% (US$M)",
-            "TVaR 99% (US$M)",
-            "P(Loss ≥ US$10M)",
-            "P(Loss ≥ US$100M)"
-        ],
-        severity_results
-    )
-)
-
-source_note("""
-    Risks manuscript, Table 4, page 33.
-    Monetary values are shown in US$ millions.
-    GPD shapes are sensitivity assumptions rather
-    than estimates from individual loss observations.
-""")
-
-# ------------------------------------------------------------
-# CHART 3 — INDIVIDUAL SEVERITY TVAR
-# ------------------------------------------------------------
-
-fig = go.Figure()
-
-fig.add_trace(
-    go.Scatter(
-        x=["0.25", "0.50", "0.75"],
-        y=[2.958632, 3.211599, 3.534421],
-
-        mode="lines+markers+text",
-
-        name="Individual-loss TVaR 99%",
-
-        line=dict(
-            color=VIOLET,
-            width=3
+    render_grid("grid-3", [
+        info_card(
+            "Temporal dependence", "Incidents do not always arrive independently",
+            "Cyber events can cluster and follow self-exciting patterns. Event order, timing and earlier activity can inform short-horizon prediction."
         ),
-
-        marker=dict(
-            size=10,
-            color=VIOLET
+        info_card(
+            "Interconnected exposure", "Risk is shared between entities",
+            "Related systems can experience directional spillovers and delayed contagion. The six-entity Hawkes benchmark represents these stylised interactions."
         ),
+        info_card(
+            "Monetary consequences", "Technical events are not insurance claims",
+            "A count of synthetic events cannot directly be converted into financial losses. The journal paper introduces explicit event-to-loss assumptions and independent severity calibration."
+        ),
+    ])
 
-        text=["2.959", "3.212", "3.534"],
-        textposition="top center",
-
-        hovertemplate=(
-            "GPD shape: %{x}<br>"
-            "TVaR: US$%{y:.3f}M"
-            "<extra></extra>"
-        )
+    section_heading(
+        "Research Framework",
+        "The original end-to-end workflow, now aligned with the latest two manuscripts.",
     )
-)
+    render_grid("grid-4", [
+        process_card(
+            "01", "Hawkes event benchmark",
+            "Simulate clustered activity across six entities with variable background intensity, directional excitation, propagation delays and synthetic marks."
+        ),
+        process_card(
+            "02", "Phase 1 · entity ranking",
+            "Compare five model families on the five-unit top-risk entity classification task under the AusDM conference protocol."
+        ),
+        process_card(
+            "03", "Phase 2 · frequency",
+            "Evaluate ten families for three-unit system-wide event counts, with chronological splits, baselines and trajectory robustness."
+        ),
+        process_card(
+            "04", "Financial and external risk",
+            "Combine count forecasts with monetary severity and event-to-loss sensitivity; separately test forecast transfer using URLhaus data."
+        ),
+    ])
+    caption("<b>Research design:</b> Synthetic marks influence the Hawkes excitation process and do not represent monetary loss. Phase 1 classification and Phase 2 event-count forecasting are distinct targets with horizons of five and three dimensionless time units, respectively.")
 
-fig.update_layout(
-    title="Individual-loss TVaR 99% — Severity-tail sensitivity",
-    xaxis_title="GPD shape parameter",
-    yaxis_title="TVaR 99% (US$ millions)",
-    yaxis_range=[2.5, 4.0],
-    showlegend=False
-)
+    section_heading("Why the two classification numbers differ", "These are separate experiments—not a before-and-after improvement or evidence that a model deteriorated only because of a different split.")
+    render_grid("grid-2", [
+        info_card("Conference · AusDM 2026", "Top-risk prediction: 90.23%", "The conference THP experiment uses a stratified random train/validation/test design, a five-unit risk window and its own dataset/preprocessing/model configuration. The primary conference THP test accuracy is 0.9023."),
+        info_card("Journal · revised Risks manuscript", "Chronological re-evaluation: 45.40%", "The journal uses chronological, boundary-purged classification evaluation. Neural Hawkes has the highest fitted-model accuracy (0.4540), below the majority-class reference (0.4687). Class imbalance and other metrics qualify the result."),
+    ])
+    caption("<b>Interpretation:</b> The journal explicitly states that differences include the data, horizons, preprocessing, model configurations and evaluation protocol. Do not attribute the entire gap to random versus chronological splitting alone.")
 
-show_chart(fig)
+    section_heading("Synthetic benchmark specification", "Both studies involve six interdependent entities, but the journal documents a corrected jump-aware simulator and additional checks.")
+    kpi([
+        ("6", "Interacting entities", "Directional self- and cross-excitation with propagation lags"),
+        ("10,000", "Simulated events", "Primary synthetic trajectory"),
+        ("0.92125", "Kernel mass", "Integral of the two-component excitation kernel"),
+        ("≈0.3425", "Reference spectral radius", "Subcriticality diagnostic under the journal approximation"),
+    ])
+    render_grid("grid-3", [
+        info_card("Event record", "Multivariate marked point process", "Events retain entity identity, occurrence time and mark; a six-entity system supports interdependence and future-window targets."),
+        info_card("Simulation correction", "Jump-aware thinning and five seeds", "The journal validates the corrected simulator's local proposal bound, event ordering, marks and stability across five independently generated event streams."),
+        info_card("Scientific limitation", "Controlled data, not observed claims", "Simulator time is dimensionless, synthetic marks are non-monetary, and matching a Hawkes data generator may favour Hawkes-aligned learners."),
+    ])
+    caption("<b>Horizon:</b> The conference classification target uses h = 5, whereas the journal frequency target uses h = 3. Synthetic simulator time units are not real hours, days or annual insurance exposure.")
 
-render_html(
-    highlight_panel(
-        "Severity Sensitivity — Main Finding",
-        """
-        Mean severity remains fixed at
-        <b>US$264,000</b>.
 
-        Individual-loss TVaR at 99%
-        increases from approximately
-        <b>US$2.959M</b> to <b>US$3.534M</b>
-        as the GPD shape increases.
+with tab_conference:
+    section_heading("AusDM 2026 · Conference Results", "A Hawkes–Transformer Model for Cyber Risk Prediction: Comparative Evaluation on a Synthetic Hawkes Benchmark")
+    kpi([
+        ("0.9023", "THP accuracy", "Highest reported primary-task accuracy"),
+        ("0.8951", "THP macro-F1", "Best class-balanced F1 in this comparison"),
+        ("0.9839", "THP top-2", "True entity included in two highest-ranked predictions"),
+        ("0.9940", "THP top-3", "Primary future-window ranking metric"),
+    ])
+    st.markdown("**Table 1 — Primary top-risk entity comparison**")
+    conference_display = frame(CONFERENCE_RESULTS, ["Model", "Accuracy", "Macro-F1", "Weighted-F1", "Top-2", "Top-3"])
+    st.dataframe(conference_display, hide_index=True, use_container_width=True,
+                 column_config={"Accuracy": st.column_config.NumberColumn(format="%.4f"),
+                                "Macro-F1": st.column_config.NumberColumn(format="%.4f"),
+                                "Weighted-F1": st.column_config.NumberColumn(format="%.4f"),
+                                "Top-2": st.column_config.NumberColumn(format="%.4f"),
+                                "Top-3": st.column_config.NumberColumn(format="%.4f")})
 
-        The probability of losses exceeding
-        US$100M increases by more than
-        three orders of magnitude,
-        demonstrating the importance
-        of extreme-tail assumptions.
-        """
+    names = [r["Model"] for r in CONFERENCE_RESULTS]
+    vals = [r["Accuracy"] * 100 for r in CONFERENCE_RESULTS]
+    bar_chart(names, vals, "Conference primary-task accuracy", "Accuracy (%)", highlight="Transformer Hawkes Process", height=450)
+
+    render_grid("grid-2", [
+        info_card("Model design", "Transformer Hawkes Process (THP)", "An established attention-based temporal point-process formulation adapted and evaluated in a cyber-risk setting. This study does not claim to invent the THP architecture."),
+        info_card("Evaluation protocol", "Future-window risk classification", "10,000 synthetic events; horizon h = 5; sequence history length 50. THP and supervised GRU use stratified random partitions, rather than the later journal's common chronological protocol."),
+    ])
+    caption("<b>Source:</b> Final AusDM 2026 manuscript, Section 5, Table 1. Severity/time accuracies are separate auxiliary diagnostic tasks. The 90.23% figure is not a real-world cybersecurity accuracy estimate.")
+
+
+with tab_recheck:
+    section_heading("Journal Re-evaluation · Phase 1", "Five classification families evaluated on 1,500 shared chronological, boundary-purged held-out origins.")
+    kpi([
+        ("46.87%", "Majority reference", "Always predict C3; diagnostic baseline"),
+        ("45.40%", "Highest fitted accuracy", "Likelihood-based Neural Hawkes"),
+        ("0.1975", "Best macro-F1", "Hawkes-informed supervised GRU"),
+        ("0.6967", "Best top-3", "Poisson baseline"),
+    ])
+    st.markdown("**Table 1 — Journal chronological classification**")
+    table(JOURNAL_CLASSIFICATION)
+
+    names = [r["Model"] for r in JOURNAL_CLASSIFICATION]
+    accuracies = [100 * r["Accuracy"] for r in JOURNAL_CLASSIFICATION]
+    fig = go.Figure(go.Bar(
+        x=accuracies, y=names, orientation="h",
+        marker_color=[VIOLET if "Neural Hawkes" in x else BLUE for x in names],
+        hovertemplate="%{y}<br>%{x:.2f}%<extra></extra>",
+    ))
+    fig.add_vline(x=46.87, line_color="#dc2626", line_dash="dash",
+                  annotation_text="Majority-class reference 46.87%", annotation_position="top")
+    fig.update_layout(title="Held-out accuracy versus majority-class reference", xaxis_title="Accuracy (%)",
+                      yaxis=dict(autorange="reversed"))
+    show_chart(fig, 440)
+
+    render_grid("grid-2", [
+        info_card("Class imbalance", "C3 dominates the test labels", "C3 represents 46.87% of test outcomes. The Neural Hawkes model predicts C3 as its first choice for 93.2% of origins, which raises raw accuracy without ensuring balanced six-class discrimination."),
+        info_card("Metric trade-off", "No universal classification winner", "The supervised GRU leads macro- and weighted-F1, Poisson leads top-3, and Neural Hawkes leads accuracy and top-2. No fitted model exceeds the constant-C3 accuracy reference."),
+    ])
+    caption("<b>Not a direct score comparison:</b> The conference and revised journal studies differ in multiple experimental choices. No causal claim about the cause of their accuracy difference is justified by these tables.")
+
+
+with tab_frequency:
+    section_heading("Phase 2 · System-wide Frequency Forecasting", "Predict the number of events across all six entities in the next three dimensionless simulator-time units.")
+    kpi([
+        ("10", "Model families", "Simple, Hawkes, regression, recurrent and Transformer"),
+        ("6.5815", "Best learned validation MAE", "GRU-NB · selected on validation"),
+        ("6.9875", "Lowest primary test MAE", "Rolling Mean (m=8)"),
+        ("7.2542", "Fitted Hawkes test MAE", "Primary trajectory, not all robustness runs"),
+    ])
+    st.markdown("**Table 2 — Validation and held-out test MAE (lower is better)**")
+    table(FREQUENCY_RESULTS)
+
+    sorted_rows = sorted(FREQUENCY_RESULTS, key=lambda r: r["Test MAE"])
+    bar_chart([r["Model"] for r in sorted_rows], [r["Test MAE"] for r in sorted_rows],
+              "Primary-trajectory held-out MAE", "Events", highlight="Rolling Mean (m=8)", height=490)
+    caption("<b>Model selection versus evaluation:</b> GRU-NB was the prespecified validation-selected learned family (mean validation MAE 6.5815). Rolling Mean had the lowest final test MAE (6.9875); the held-out test was not used to change the frozen selection.")
+
+    section_heading("Out-of-trajectory robustness", "The leading model changes when the simulator's event path and covariate path change.")
+    st.markdown("**Table 3 — Joint event-and-covariate realisations**")
+    table(JOINT_TRAJECTORIES)
+    render_grid("grid-3", [
+        info_card("J1", "Rolling Mean leads", "Held-out MAE 5.9829; GRU-NB follows with MAE 6.8172."),
+        info_card("J2", "GRU-NB leads", "Held-out MAE 6.7321; Rolling Mean records 7.3394."),
+        info_card("Numerical qualification", "No accepted fitted Hawkes forecast", "The frozen optimiser acceptance criterion was not met on J1 or J2. Fitted Hawkes is unavailable, not a zero-score baseline."),
+    ])
+
+    section_heading("Forecast calibration matters", "Reasonable average count forecasts do not automatically imply suitable uncertainty intervals.")
+    render_grid("grid-3", [
+        metric_card("0.9406", "GRU-NB mean calibration ratio", "Primary test · average underprediction"),
+        metric_card("0.2781", "GRU-NB predicted-mean variance ratio", "Conditional mean variation relative to observed counts"),
+        metric_card("98.6%", "Observed coverage of nominal 80% interval", "GRU-NB · substantial overcoverage on primary test"),
+    ])
+    caption("<b>Further robustness:</b> Across three shared-covariate event trajectories, fitted classical Hawkes has the lowest descriptive mean MAE. The manuscript does not assert population-level or universal superiority for any family.")
+
+
+with tab_financial:
+    section_heading("Frequency–Severity Financial Scenarios", "Separately calibrated monetary severity is combined with technical event-frequency forecasts using explicit thinning assumptions.")
+    kpi([
+        ("USD 264k", "Mean retained-incident severity", "Theoretical common mean across four severity specifications"),
+        ("4%", "Severe-loss tail entry", "P(single-incident loss ≥ USD 1 million)"),
+        ("0.01", "Illustrative q reference", "Not an empirically estimated claim-conversion probability"),
+        ("2 / 10", "Stable heavy-tail combinations", "Reference Monte Carlo screen; infinite-variance scenarios"),
+    ])
+
+    st.markdown("**Explore the manuscript's five event-to-loss scenarios**")
+    q_values = [r["q"] for r in THINNING_RESULTS]
+    selected_q = st.select_slider(
+        "Independent event-to-loss thinning parameter (q)",
+        options=q_values, value=0.01, format_func=lambda value: f"{value:g}",
+        help="The values are prespecified scenario assumptions, not estimated claim probabilities.",
     )
-)
+    chosen = next(r for r in THINNING_RESULTS if r["q"] == selected_q)
+    kpi([
+        (f"{chosen['Retained']:.4f}", "Expected retained count", "GRU-NB · one three-unit window"),
+        (f"{chosen['P_positive'] * 100:.2f}%", "P(at least one retained event)", "Model-derived under the scenario"),
+        (f"USD {chosen['ExpectedLoss']:,.0f}", "Expected aggregate loss", "Analytical GRU-NB scenario mean"),
+        (f"{selected_q:g}", "Selected conversion scenario", "Independent thinning; not calibrated from claims"),
+    ])
+    table(THINNING_RESULTS, ["q", "Retained", "P_positive", "ExpectedLoss"], formats={
+        "q": lambda x: f"{x:g}", "Retained": lambda x: f"{x:,.6f}",
+        "P_positive": lambda x: f"{x:.6f}", "ExpectedLoss": lambda x: f"USD {x:,.0f}"})
+
+    section_heading("Scenario sensitivity across frequency models", "All ten families share the same assumed severity mean; model-level differences reflect frequency forecasts.")
+    st.markdown("**Analytical expected aggregate loss at q = 0.01**")
+    sorted_losses = sorted(EXPECTED_LOSS_Q001, key=lambda r: r["USD"])
+    bar_chart([r["Model"] for r in sorted_losses], [r["USD"] for r in sorted_losses],
+              "Expected loss per dimensionless three-unit window", "USD",
+              highlight="GRU-NB", height=475)
+    caption("<b>Range:</b> approximately USD 99,881–135,346 across ten frequency families at q = 0.01. A larger scenario loss is not evidence that a forecasting model is better or worse.")
+
+    section_heading("Severity-tail sensitivity", "Four specifications match the same mean and tail-entry probability but imply different extremes.")
+    st.markdown("**Table 4 — Single-incident severity tails (analytical)**")
+    severity_display = [
+        {"Specification": r["Specification"], "VaR99 (USD M)": round(r["VaR99_USD"]/1e6, 3),
+         "TVaR99 (USD M)": round(r["TVaR99_USD"]/1e6, 3),
+         "P(Z≥10M)": f"{r['P10M']:.2e}", "P(Z≥100M)": f"{r['P100M']:.2e}", "Variance": r["Variance"]}
+        for r in SEVERITY_RESULTS
+    ]
+    table(severity_display)
+    bar_chart([r["Specification"] for r in SEVERITY_RESULTS],
+              [r["TVaR99_USD"] / 1e6 for r in SEVERITY_RESULTS],
+              "Single-incident TVaR at 99%", "USD millions", horizontal=False, height=390)
+
+    st.markdown("**Table 6 — Compound-loss comparison at q = 0.01, GPD ξ = 0.25**")
+    table(COMPOUND_LOSS, formats={"P(L>=10M)": lambda x: f"{x:.2e}"})
+    caption("<b>Monte Carlo precision:</b> In the ten infinite-variance severity/q configurations, only ξ = 0.50 at q = 1 and q = 0.001 pass the manuscript's full reference stability screen. Other extreme-tail estimates must not be represented as converged. The six-family compound-loss table above uses a passing finite-variance reference configuration.")
+    caption("<b>Financial interpretation:</b> These are conditional scenarios per <i>dimensionless simulator-time window</i>. They are not annualised loss projections, insurance premiums, observed claims or monetary predictions for real businesses. Synthetic marks and URLhaus URL counts are not claim severities.")
+
+
+with tab_external:
+    section_heading("URLhaus · External Evaluation", "A separate observational test of forecasting malicious-URL counts, not a claim or loss dataset.")
+    kpi([
+        ("24 hours", "Primary observational horizon", "Chronological URLhaus count forecasting"),
+        ("254.620", "Lowest held-out MAE", "Training Mean baseline"),
+        ("416.519", "THP held-out MAE", "L=64 count configuration"),
+        ("No", "Reproducible prospective skill", "Not established by evaluated URLhaus models"),
+    ])
+    st.markdown("**Table 7 — URLhaus canonical 24-hour comparison**")
+    url_display = []
+    for r in URLHAUS_RESULTS:
+        d = r.copy()
+        d["Pearson"] = "Undefined (constant prediction)" if r["Pearson"] is None else f"{r['Pearson']:.4f}"
+        url_display.append(d)
+    table(url_display)
+    sorted_url = sorted(URLHAUS_RESULTS, key=lambda r: r["MAE"])
+    bar_chart([r["Model"] for r in sorted_url], [r["MAE"] for r in sorted_url],
+              "URLhaus 24-hour held-out MAE", "URLs", highlight="Training Mean", height=400)
+    render_grid("grid-2", [
+        info_card("Primary result", "Simple baseline is strongest", "Training Mean records MAE 254.620. THP has MAE 416.519 and Pearson correlation −0.0865, with substantial underprediction and compressed forecast variation."),
+        info_card("External validity", "No reliable forecasting transfer", "Context variants and later 1-, 3-, 6- and 12-hour diagnostics do not establish reproducible prospective forecasting signal. Those exploratory diagnostics are not an independent confirmation set."),
+    ])
+    caption("<b>Scope:</b> URLhaus malicious URLs are operational threat-intelligence observations. They are not insurance claims, and do not calibrate the simulator-time scale, event-to-loss q, monetary severity or aggregate-loss component.")
+
+    section_heading("Research limitations and responsible interpretation", "Transparency about what each source supports is central to the contribution.")
+    render_grid("grid-4", [
+        info_card("Synthetic design", "Controlled, not calibrated to practice", "A Hawkes-generated benchmark may favour suitably matched models. It is not a real cyber-claims portfolio."),
+        info_card("Protocol sensitivity", "Targets and splits differ", "Random-split conference accuracy and chronological journal accuracy have distinct experimental designs and cannot be treated as a single universal ranking."),
+        info_card("Financial assumptions", "Event-to-loss mapping is a scenario", "Independent thinning and severity-tail specifications are assumptions; q and exposure duration are not estimated from linked event-and-claim data."),
+        info_card("Numerical stability", "Heavy tails demand caution", "Many infinite-variance simulation settings fail the reference precision criteria; reporting more draws does not by itself demonstrate convergence."),
+    ])
 
 
 # ============================================================
-# 12. AGGREGATE LOSS
-# ============================================================
-
-section_heading(
-    "Phase 2 — Aggregate Cyber-Loss Results",
-    "Nine conditional compound-loss scenarios "
-    "across three frequency states and "
-    "three severity-tail shapes."
-)
-
-render_grid("grid-4", [
-
-    metric_card(
-        "US$8.173M",
-        "Low-Frequency Expected Cost",
-        "Mean count: 30.958."
-    ),
-
-    metric_card(
-        "US$10.854M",
-        "Median-Frequency Expected Cost",
-        "Mean count: 41.112."
-    ),
-
-    metric_card(
-        "US$12.734M",
-        "High-Frequency Expected Cost",
-        "Mean count: 48.233."
-    ),
-
-    metric_card(
-        "US$59.986M",
-        "Maximum Reported TVaR 99%",
-        "High frequency, heaviest tail."
-    )
-])
-
-render_html(
-    data_table(
-        [
-            "Frequency State",
-            "Mean Count",
-            "GPD Shape",
-            "Expected Cost (US$M)",
-            "VaR 99% (US$M)",
-            "TVaR 99% (US$M)"
-        ],
-        aggregate_results,
-        highlight_rows=[5, 8]
-    )
-)
-
-source_note("""
-    Risks manuscript, Table 5, page 35.
-    One million aggregate losses were simulated
-    per seed and scenario, using three seeds.
-    These are conditional simulator-time scenarios,
-    not annualised insurance losses.
-""")
-
-# ------------------------------------------------------------
-# CHART 4 — AGGREGATE TVAR SENSITIVITY
-# ------------------------------------------------------------
-
-shapes = ["0.25", "0.50", "0.75"]
-
-compound_tvar = {
-    "Low Frequency": [19.451, 25.979, 43.333],
-    "Median Frequency": [23.760, 31.599, 53.584],
-    "High Frequency": [26.616, 35.172, 59.986]
-}
-
-fig = go.Figure()
-
-for name, values, colour in [
-    ("Low Frequency", compound_tvar["Low Frequency"], BLUE),
-    ("Median Frequency", compound_tvar["Median Frequency"], VIOLET),
-    ("High Frequency", compound_tvar["High Frequency"], CYAN)
-]:
-
-    fig.add_trace(
-        go.Scatter(
-            x=shapes,
-            y=values,
-
-            mode="lines+markers",
-            name=name,
-
-            line=dict(
-                color=colour,
-                width=3
-            ),
-
-            marker=dict(
-                color=colour,
-                size=9
-            ),
-
-            hovertemplate=(
-                "GPD shape: %{x}<br>"
-                "TVaR: US$%{y:.3f}M"
-                "<extra>%{fullData.name}</extra>"
-            )
-        )
-    )
-
-fig.update_layout(
-    title="Aggregate TVaR 99% — Frequency and severity-tail sensitivity",
-    xaxis_title="GPD severity-tail shape",
-    yaxis_title="Aggregate TVaR 99% (US$ millions)",
-    yaxis_range=[15, 65]
-)
-
-show_chart(fig, height=420)
-
-render_grid("grid-3", [
-
-    info_card(
-        "Frequency Effect",
-        "Higher frequency raises expected loss",
-        """
-        Expected aggregate cost rises
-        from US$8.173M to US$12.734M
-        between low- and high-frequency states.
-        """
-    ),
-
-    info_card(
-        "Tail Effect",
-        "Extreme risk increases sharply",
-        """
-        At median frequency, TVaR 99%
-        increases from US$23.760M
-        to US$53.584M as severity
-        tails become heavier.
-        """
-    ),
-
-    info_card(
-        "Exceedance Probability",
-        "High-loss scenarios remain tail-sensitive",
-        """
-        At high frequency, the probability
-        of aggregate cost reaching US$50M
-        rises from 2.4e-5 to 2.46e-3
-        across the lightest and heaviest tails.
-        """
-    )
-])
-
-render_html(
-    highlight_panel(
-        "Aggregate Risk — Main Finding",
-        """
-        At median frequency, expected aggregate
-        incident cost remains approximately
-        <b>US$10.854M</b> across the three
-        equal-mean severity scenarios.
-
-        However, aggregate TVaR at 99%
-        increases from <b>US$23.760M</b>
-        to <b>US$53.584M</b>.
-
-        These are conditional scenarios
-        using an illustrative event-to-loss
-        conversion probability of one.
-        They are not observed insurance
-        claims or actual premiums.
-        """
-    )
-)
-
-
-# ============================================================
-# 13. URLHAUS EXTERNAL EVALUATION
-# ============================================================
-
-section_heading(
-    "Phase 2 — URLhaus External Evaluation",
-    "Assessing synthetic-to-real forecasting transfer "
-    "using observational cyber-threat data."
-)
-
-render_grid("grid-4", [
-
-    metric_card(
-        "254.620",
-        "Mean Baseline MAE",
-        "Best point-error result in the 24-hour comparison."
-    ),
-
-    metric_card(
-        "416.519",
-        "THP MAE",
-        "Higher than the simpler comparison models."
-    ),
-
-    metric_card(
-        "−0.0865",
-        "THP Pearson",
-        "Negative correlation with observed counts."
-    ),
-
-    metric_card(
-        "0.0024",
-        "THP Variance Ratio",
-        "Very low conditional-mean forecast variation."
-    )
-])
-
-render_html(
-    data_table(
-        [
-            "Model",
-            "MAE",
-            "RMSE",
-            "NMAE",
-            "NRMSE",
-            "Pearson"
-        ],
-        urlhaus_results,
-        highlight_rows=[0]
-    )
-)
-
-source_note("""
-    Risks manuscript, Table 6, page 36.
-    The principal THP configuration uses
-    64-event histories and forecasts URLhaus
-    record counts over the next 24 hours.
-""")
-
-# ------------------------------------------------------------
-# CHART 5 — URLHAUS MAE
-# ------------------------------------------------------------
-
-urlhaus_names = [row[0] for row in urlhaus_results]
-urlhaus_mae = [float(row[1]) for row in urlhaus_results]
-
-fig = go.Figure()
-
-fig.add_trace(
-    go.Bar(
-        x=urlhaus_mae,
-        y=urlhaus_names,
-        orientation="h",
-
-        marker_color=[
-            VIOLET if name == "THP Count Model" else BLUE
-            for name in urlhaus_names
-        ],
-
-        text=[
-            f"{value:.1f}"
-            for value in urlhaus_mae
-        ],
-
-        textposition="outside",
-
-        hovertemplate=(
-            "%{y}<br>"
-            "MAE: %{x:.3f}"
-            "<extra></extra>"
-        )
-    )
-)
-
-fig.update_layout(
-    title="URLhaus — 24-hour forecasting error",
-    xaxis_title="MAE (URLhaus records per 24 hours)",
-    yaxis_title=None,
-    xaxis_range=[0, 490],
-    yaxis=dict(autorange="reversed"),
-    showlegend=False
-)
-
-show_chart(fig, height=410)
-
-render_html(
-    highlight_panel(
-        "URLhaus — Main Finding",
-        """
-        The THP count model did not reproduce
-        the favourable synthetic forecasting
-        relationship on URLhaus.
-
-        Its 24-hour MAE was <b>416.519</b>,
-        compared with <b>254.620</b>
-        for the Mean Baseline.
-
-        Pearson correlation was
-        <b>−0.0865</b>, and the
-        forecast variance ratio was
-        only <b>0.0024</b>.
-
-        These results demonstrate limitations
-        in transferring controlled synthetic
-        forecasting behaviour to observational
-        cyber-threat data.
-
-        URLhaus is not used for monetary
-        severity or insurance-claims analysis.
-        """
-    )
-)
-
-
-# ============================================================
-# 14. OVERALL FINDINGS
+# RESEARCH FINDINGS — NARRATIVE FROM ORIGINAL PORTFOLIO
 # ============================================================
 
 section_heading(
     "Overall Research Findings",
-    "The combined experiments show why model selection "
-    "must depend on the prediction task."
+    "The two papers demonstrate why the task, validation protocol and benchmark must determine the model comparison.",
 )
-
 render_grid("grid-3", [
-
     info_card(
-        "Finding 01",
-        "Prediction targets matter",
-        """
-        THP performed best on synthetic
-        top-risk entity classification,
-        while GRU performed best on
-        synthetic system-wide count prediction.
-        """
+        "Finding 01", "Temporal structure is learnable in the conference benchmark",
+        "Under the AusDM conference experiment, THP led all five reported primary classification metrics, including 0.9023 accuracy and 0.8951 macro-F1. This is a controlled synthetic result."
     ),
-
     info_card(
-        "Finding 02",
-        "Independent testing matters",
-        """
-        GRU's advantage over persistence
-        was reproduced on a separate
-        synthetic trajectory.
-        """
+        "Finding 02", "Chronological evaluation changes the evidence",
+        "In the journal re-evaluation, the most accurate fitted classifier reached 0.4540, below the 0.4687 majority-class reference. No method dominated every classification metric."
     ),
-
     info_card(
-        "Finding 03",
-        "Baselines remain essential",
-        """
-        Persistence and statistical models
-        provided important reference
-        points when evaluating
-        complex neural architectures.
-        """
+        "Finding 03", "Simple baselines remain competitive",
+        "GRU-NB was validation-selected for frequency prediction, but Rolling Mean delivered the lowest primary held-out test MAE. Fitted Hawkes performance varied by trajectory and numerical acceptance."
     ),
-
     info_card(
-        "Finding 04",
-        "Average loss is insufficient",
-        """
-        Equal-mean severity scenarios
-        produced substantially different
-        tail-risk outcomes.
-        """
+        "Finding 04", "Uncertainty and calibration matter",
+        "Prediction-interval overcoverage and compressed conditional-mean variation show why low point error alone cannot validate a probabilistic frequency forecast."
     ),
-
     info_card(
-        "Finding 05",
-        "External generalisation is challenging",
-        """
-        The URLhaus experiments did not
-        reproduce the positive forecasting
-        association observed in the
-        controlled synthetic setting.
-        """
+        "Finding 05", "Equal means do not imply equal tail risks",
+        "A full lognormal and three spliced GPD severity distributions share USD 264,000 theoretical mean severity but differ in extreme quantiles and tail expectations. Some Monte Carlo configurations fail stability screening."
     ),
-
     info_card(
-        "Finding 06",
-        "Financial interpretation requires assumptions",
-        """
-        The frequency, monetary severity,
-        and event-to-loss conversion
-        components must be explicitly
-        distinguished and validated.
-        """
-    )
+        "Finding 06", "Observational transfer is not established",
+        "The URLhaus evaluation does not support reproducible prospective count-forecasting skill. Malicious-URL records were not used as insurance claims or monetary-severity observations."
+    ),
 ])
-
-
-# ============================================================
-# 15. TECHNICAL CAPABILITIES
-# ============================================================
 
 section_heading(
     "Technical & Research Capabilities",
-    "Skills demonstrated through the two-phase research program."
+    "The methods and professional skills demonstrated across both accepted research papers.",
 )
-
 render_grid("grid-3", [
-
-    info_card(
-        "Programming",
-        "Python Research Pipelines",
-        """
-        Simulation, preprocessing,
-        sequence construction,
-        feature preparation, model training,
-        evaluation, and reporting.
-        """
-    ),
-
-    info_card(
-        "Temporal Modelling",
-        "Hawkes and Neural Sequence Models",
-        """
-        Multivariate Hawkes processes,
-        Transformer Hawkes Process,
-        GRU/LSTM, temporal dependence,
-        and sequence learning.
-        """
-    ),
-
-    info_card(
-        "Statistical Modelling",
-        "Count and Probability Models",
-        """
-        Poisson and Negative Binomial
-        regression, probabilistic forecasts,
-        likelihood evaluation, and calibration.
-        """
-    ),
-
-    info_card(
-        "Research Validation",
-        "Reliable Experimental Design",
-        """
-        Chronological splitting,
-        independent testing,
-        moving-block bootstrap,
-        baseline comparison,
-        and uncertainty analysis.
-        """
-    ),
-
-    info_card(
-        "Risk Analytics",
-        "Actuarial Frequency–Severity",
-        """
-        Monetary severity calibration,
-        compound-loss simulations,
-        VaR, TVaR, expected aggregate cost,
-        and exceedance probabilities.
-        """
-    ),
-
-    info_card(
-        "Communication",
-        "Academic Research Reporting",
-        """
-        Research framing, literature review,
-        methodology, results interpretation,
-        visualisation, and scientific writing.
-        """
-    )
+    info_card("Data science", "Python research pipelines", "Event simulation, chronological sample construction, cleaning, feature preparation, model fitting, structured validation and reproducible reporting."),
+    info_card("Temporal modelling", "Hawkes and neural sequence methods", "Multivariate marked Hawkes processes, directional excitation, Transformer Hawkes Process, Neural Hawkes-style encoders, GRU and LSTM models."),
+    info_card("Statistical modelling", "Count forecasts and likelihoods", "Poisson and Negative Binomial regression, simple and rolling baselines, fitted Hawkes, count distributions, calibration and prediction intervals."),
+    info_card("Research validation", "Protocol-aware empirical testing", "Chronological and boundary-purged splits, multiple trajectories, baseline comparisons, stability acceptance criteria and numerical uncertainty."),
+    info_card("Risk analytics", "Frequency–severity loss scenarios", "Event-to-loss thinning, separately calibrated monetary loss distributions, expected aggregate loss, VaR, TVaR, exceedance and Monte Carlo precision."),
+    info_card("Communication", "Research reporting and interpretation", "Two accepted research outputs, critical discussion of negative results and careful separation of simulated, observed and scenario-based evidence."),
 ])
-
-
-# ============================================================
-# 16. LIMITATIONS
-# ============================================================
-
-section_heading(
-    "Research Limitations",
-    "Important boundaries on the interpretation "
-    "of the reported results."
-)
-
-render_grid("grid-4", [
-
-    info_card(
-        "Synthetic Benchmark",
-        "Controlled data-generating mechanism",
-        """
-        Strong synthetic results do not
-        establish universal performance
-        on real cyber incidents.
-        """
-    ),
-
-    info_card(
-        "Count Forecasting",
-        "Compressed forecast variability",
-        """
-        Independent GRU results were
-        positive, but the predicted
-        conditional means remained
-        less variable than observed counts.
-        """
-    ),
-
-    info_card(
-        "Financial Assumptions",
-        "Illustrative event-to-loss mapping",
-        """
-        Aggregate-loss scenarios depend
-        on independent severity assumptions
-        and a specified event-to-loss
-        conversion probability.
-        """
-    ),
-
-    info_card(
-        "External Evaluation",
-        "Limited URLhaus transfer",
-        """
-        The observational forecasting
-        experiments did not establish
-        reproducible predictive transfer
-        from the synthetic model environment.
-        """
-    )
-])
-
-
-# ============================================================
-# 17. RESEARCH CONTRIBUTION
-# ============================================================
 
 section_heading(
     "Research Contribution",
-    "Connecting temporal prediction, model suitability, "
-    "and conditional financial-risk analysis."
+    "From forecasting where cyber activity concentrates to conditional financial-risk quantification.",
 )
-
-render_html(
-    highlight_panel(
-        "From Prediction to Loss Quantification",
-        """
-        The research progresses from
-        <b>predicting where event activity
-        may concentrate</b> to investigating
-        <b>how many events may occur</b>
-        and <b>how monetary consequences
-        may accumulate</b>.
-
-        Phase 1 demonstrates learnable
-        temporal structure within a
-        controlled Hawkes benchmark.
-
-        Phase 2 shows that model ranking
-        changes when the task changes,
-        while tail-risk analysis reveals
-        how monetary severity assumptions
-        can affect extreme-loss estimates.
-
-        The external evaluation also
-        establishes important boundaries
-        on synthetic-to-real generalisation.
-
-        Together, the work supports a
-        task-aware and transparent approach
-        to cyber-risk modelling.
-        """
-    )
-)
-
+render_html(highlight_panel(
+    "From Prediction to Loss Quantification",
+    "The conference study demonstrates that an attention-based Hawkes representation can be effective for future-window <b>entity-risk classification</b> in a controlled synthetic benchmark. "
+    "The journal extension investigates a different but connected question: <b>how many events occur system-wide</b>, how count-model performance depends on evaluation and trajectory, and how expected and extreme monetary consequences change under stated <b>frequency–severity assumptions</b>. "
+    "The observational URLhaus results and numerical stability checks are part of the contribution, because they define where the evidence does—and does not—support inference."
+))
 
 # ============================================================
-# 18. RESEARCH DATA AND LINKS
+# RESEARCH SOURCES & NAVIGATION
 # ============================================================
 
-section_heading(
-    "Research Data & Supporting Material",
-    "Dataset availability and reproducibility."
-)
-
+section_heading("Research Publications & Sources", "Both research outputs are accepted; numerical summaries follow the supplied final conference paper and revised journal manuscript.")
 render_grid("grid-2", [
-
-    info_card(
-        "Research Dataset",
-        "IEEE DataPort",
-        """
-        Supporting research data
-        has been deposited with IEEE DataPort,
-        providing an accessible reference
-        for research material and
-        the benchmark.
-        """
+    publication_card(
+        "Phase 1 · AusDM 2026", "Accepted",
+        "A Hawkes–Transformer Model for Cyber Risk Prediction: Comparative Evaluation on a Synthetic Hawkes Benchmark",
+        "Final 14-page paper. Primary experiment: five-unit top-risk entity classification. Table 1 reports THP accuracy 0.9023, macro-F1 0.8951 and top-3 accuracy 0.9940.",
+        "All conference results above are attributed to this source, not the journal re-evaluation."
     ),
-
-    info_card(
-        "Research Outputs",
-        "Conference and Journal Papers",
-        """
-        Results presented in this page
-        are drawn from the accepted
-        AusDM 2026 conference research
-        and Phase 2 manuscript accepted
-        by MDPI Risks.
-        """
-    )
+    publication_card(
+        "Phase 2 · MDPI Risks", "Accepted",
+        "From Cyber-Risk Prediction to Loss Quantification: A Task-Aware Frequency–Severity Framework with Hawkes Benchmarking and External Evaluation",
+        "Accepted journal paper. The 13 November 2026 manuscript supplies the latest revised results: chronological classification, ten frequency families, severity and compound-loss scenarios, robustness and URLhaus evaluation.",
+        "Accepted by MDPI Risks; no publication date or final article DOI is asserted."
+    ),
 ])
 
+caption("<b>Data and attribution:</b> The synthetic Hawkes benchmark is referenced through its IEEE DataPort DOI. This page summarises the research outputs; it does not claim the journal manuscript has been formally published.")
+left, right = st.columns(2, gap="medium")
+with left:
+    st.link_button("Synthetic benchmark · IEEE DataPort", "https://dx.doi.org/10.21227/8drm-jz27", use_container_width=True)
+with right:
+    st.link_button("URLhaus project · abuse.ch", "https://urlhaus.abuse.ch/", use_container_width=True)
+
 st.write("")
-
-st.link_button(
-    "🔗 Open Research Dataset DOI",
-    DATA_DOI
-)
-
-st.write("")
-
-st.page_link(
-    "Home.py",
-    label="← Back to Portfolio Home"
-)
-
-source_note("""
-    Phase 2 quantitative results are based on the
-    supplied Nguyen et al. Risks manuscript,
-    version dated 30 September 2026,
-    particularly Tables 2–6 and Section 5.
-    Monetary amounts are expressed in US dollars.
-""")
+st.page_link("Home.py", label="← Back to Portfolio Home")
